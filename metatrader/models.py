@@ -6,7 +6,6 @@ class Pares(models.Model):
     pares = models.TextField(blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'pares'
 
 class Datatrader1Mtemp(models.Model):
@@ -20,5 +19,4 @@ class Datatrader1Mtemp(models.Model):
     par = models.ForeignKey(Pares, blank=True, null=True, on_delete=models.CASCADE)
 
     class Meta:
-        managed = False
         db_table = 'DataTrader1mTemp'

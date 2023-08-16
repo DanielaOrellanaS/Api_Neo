@@ -16,3 +16,19 @@ class ParesApiView(viewsets.ModelViewSet):
 class MonedaApiView(viewsets.ModelViewSet):
     serializer_class = MonedaSerializer
     queryset = Datatrader1Mtemp.objects.using('postgres').all()
+    def create(self, request, *args, **kwargs):
+        try:
+            par = request.data['par']
+            date = request.data['date']
+            time = request.data['time']
+            open = request.data['open']
+            high = request.data['high']
+            low = request.data['low']
+            close = request.data['close']
+            volume = request.data['volume']
+            tablePar = Pares.objects.using('postgres').get(pares=par)
+            dataInfo = Datatrader1Mtemp(par=tablePar, date=date, time=time, open=open, high=high, low=low, close=close, volume=volume)
+            dataInfo.save()
+            return Response({'Message':'Succesfull!!'}, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({'Message':str(e)}, status=status.HTTP_400_BAD_REQUEST)
