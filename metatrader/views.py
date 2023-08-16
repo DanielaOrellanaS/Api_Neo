@@ -32,4 +32,4 @@ class MonedaApiView(viewsets.ModelViewSet):
             dataInfo.save()
             return Response({'Message':'Succesfull!!'}, status=status.HTTP_201_CREATED)
         except Exception as e:
-            return Response({'Message':str(dict(request.data))}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'Message':dict(request.data)}, status=status.HTTP_400_BAD_REQUEST)
