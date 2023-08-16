@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework import status, viewsets
 from metatrader.models import *
 from metatrader.serializers import *
-
+import json
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django.urls import reverse
@@ -18,7 +18,7 @@ class MonedaApiView(viewsets.ModelViewSet):
     queryset = Datatrader1Mtemp.objects.using('postgres').all()
     def create(self, request, *args, **kwargs):
         try:
-            data=dict(request.data)
+            data=eval(list(request.data)[0].replace('\0', ''))
             par = data['par']
             date = data['date']
             time = data['time']
@@ -32,4 +32,4 @@ class MonedaApiView(viewsets.ModelViewSet):
             dataInfo.save()
             return Response({'Message':'Succesfull!!'}, status=status.HTTP_201_CREATED)
         except Exception as e:
-            return Response({'Message':dict(request.data)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'Message':str(e)}, status=status.HTTP_400_BAD_REQUEST)
