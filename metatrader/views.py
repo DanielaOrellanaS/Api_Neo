@@ -18,17 +18,18 @@ class MonedaApiView(viewsets.ModelViewSet):
     queryset = Datatrader1Mtemp.objects.using('postgres').all()
     def create(self, request, *args, **kwargs):
         try:
-            par = request.data['par']
-            date = request.data['date']
-            time = request.data['time']
-            open = request.data['open']
-            high = request.data['high']
-            low = request.data['low']
-            close = request.data['close']
-            volume = request.data['volume']
+            data=dict(request.data)
+            par = data['par']
+            date = data['date']
+            time = data['time']
+            open = data['open']
+            high = data['high']
+            low = data['low']
+            close = data['close']
+            volume = data['volume']
             tablePar = Pares.objects.using('postgres').get(pares=par)
             dataInfo = Datatrader1Mtemp(par=tablePar, date=date, time=time, open=open, high=high, low=low, close=close, volume=volume)
             dataInfo.save()
             return Response({'Message':'Succesfull!!'}, status=status.HTTP_201_CREATED)
         except Exception as e:
-            return Response({'Message':str(request.data)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'Message':str(dict(request.data))}, status=status.HTTP_400_BAD_REQUEST)
