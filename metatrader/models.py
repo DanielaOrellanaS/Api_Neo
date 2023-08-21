@@ -9,8 +9,8 @@ class Pares(models.Model):
         db_table = 'pares'
 
 class Datatrader1Mtemp(models.Model):
-    date = models.TextField(db_column='Date', blank=True, null=True)  # Field name made lowercase.
-    time = models.TextField(db_column='Time', blank=True, null=True)  # Field name made lowercase.
+    date = models.DateField(db_column='Date', blank=True, null=True)  # Field name made lowercase.
+    time = models.TimeField(db_column='Time', blank=True, null=True)  # Field name made lowercase.
     open = models.FloatField(db_column='Open', blank=True, null=True)  # Field name made lowercase.
     high = models.FloatField(db_column='High', blank=True, null=True)  # Field name made lowercase.
     low = models.FloatField(db_column='Low', blank=True, null=True)  # Field name made lowercase.
@@ -20,3 +20,32 @@ class Datatrader1Mtemp(models.Model):
 
     class Meta:
         db_table = 'DataTrader1mTemp'
+
+class AccountType(models.Model): 
+    description = models.CharField(max_length=40) 
+    
+    class Meta:
+        db_table = 'AccountType'
+        
+class Account(models.Model): 
+    accountType = models.ForeignKey(AccountType, on_delete=models.CASCADE, blank=True, null=True)
+    alias = models.CharField(max_length=40) 
+    
+    class Meta:
+        db_table = 'Account'
+
+class DetailBalance(models.Model): 
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, blank=True, null=True)
+    date = models.DateField(db_column='Date', blank=True, null=True) 
+    time = models.TimeField(db_column='Time', blank=True, null=True)
+    balance = models.FloatField(db_column='Balance', blank=True, null=True)
+    equity = models.FloatField(db_column='Equity', blank=True, null=True)
+    freemargin = models.FloatField(db_column='FreeMargin', blank=True, null=True)
+    freemarginmode = models.FloatField(db_column='FreeMarginMode', blank=True, null=True)
+    fracemareq = models.FloatField(db_column='Fracemareq', blank=True, null=True)
+    flotante = models.FloatField(db_column='Flotante', blank=True, null=True)
+    operations = models.IntegerField(db_column='Operations', blank=True, null=True)
+    fracflotante = models.FloatField(db_column='FracFlotante', blank=True, null=True)
+    
+    class Meta:
+        db_table = 'DetailBalance'

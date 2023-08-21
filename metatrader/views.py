@@ -12,6 +12,15 @@ from django.urls import reverse
 class ParesApiView(viewsets.ModelViewSet):
     serializer_class = ParesSerializer
     queryset = Pares.objects.using('postgres').all()
+    def create(self, request, *args, **kwargs):
+        print(request.data)
+        serializer = ParesSerializer(data=request.data)
+        print('SERIALIZER: ',serializer)
+        if(serializer.is_valid()):
+            Pares.objects.using('postgres').create(**serializer.validated_data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response({'Error':'Dato no valido'}, status=status.HTTP_400_BAD_REQUEST)
 
 class MonedaApiView(viewsets.ModelViewSet):
     serializer_class = MonedaSerializer
@@ -33,3 +42,36 @@ class MonedaApiView(viewsets.ModelViewSet):
             return Response({'Message':'Succesfull!!'}, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({'Message':str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class AccountTypeApiView(viewsets.ModelViewSet):
+    serializer_class = AccountTypeSerializer
+    queryset = AccountType.objects.using('postgres').all()
+    def create(self, request, *args, **kwargs):
+        serializer = AccountTypeSerializer(data=request.data)
+        if(serializer.is_valid()):
+            AccountType.objects.using('postgres').create(**serializer.validated_data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else: 
+            return Response({'Error':'Dato no valido'}, status=status.HTTP_400_BAD_REQUEST)
+        
+class AccountApiView(viewsets.ModelViewSet):
+    serializer_class = AccountSerializer
+    queryset = Account.objects.using('postgres').all()
+    def create(self, request, *args, **kwargs):
+        serializer = AccountSerializer(data=request.data)
+        if(serializer.is_valid()):
+            Account.objects.using('postgres').create(**serializer.validated_data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else: 
+            return Response({'Error':'Dato no valido'}, status=status.HTTP_400_BAD_REQUEST)
+
+class DetailBalanceApiView(viewsets.ModelViewSet):
+    serializer_class = DetailBalanceSerializer
+    queryset = DetailBalance.objects.using('postgres').all()
+    def create(self, request, *args, **kwargs):
+        serializer = DetailBalanceSerializer(data=request.data)
+        if(serializer.is_valid()):
+            DetailBalance.objects.using('postgres').create(**serializer.validated_data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else: 
+            return Response({'Error':'Dato no valido'}, status=status.HTTP_400_BAD_REQUEST)
