@@ -19,7 +19,7 @@ class Datatrader1Mtemp(models.Model):
     par = models.ForeignKey(Pares, blank=True, null=True, on_delete=models.CASCADE)
 
     class Meta:
-        db_table = 'DataTrader1mTemp'
+        db_table = 'DataTrader1m'
 
 class AccountType(models.Model): 
     description = models.CharField(max_length=40) 
