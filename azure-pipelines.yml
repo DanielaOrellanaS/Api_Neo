@@ -11,13 +11,13 @@ variables:
   azureServiceConnectionId: '6288855a-6262-4e60-a066-66919471d912'
 
   # Web app name
-  webAppName: 'apitrade'
+  webAppName: 'tradinapi'
 
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
 
   # Environment name
-  environmentName: 'apitrade'
+  environmentName: 'tradinapi'
 
   # Project root folder. Point to the folder containing manage.py file.
   projectRoot: $(System.DefaultWorkingDirectory)
