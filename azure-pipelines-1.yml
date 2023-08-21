@@ -8,7 +8,7 @@ trigger:
 
 variables:
   # Azure Resource Manager connection created during pipeline creation
-  azureServiceConnectionId: '6288855a-6262-4e60-a066-66919471d912'
+  azureServiceConnectionId: '3dd581ae-b49e-4fe6-903c-ffbef7ed495d'
 
   # Web app name
   webAppName: 'tradinapi'
@@ -22,7 +22,7 @@ variables:
   # Project root folder. Point to the folder containing manage.py file.
   projectRoot: $(System.DefaultWorkingDirectory)
 
-  # Python version: 3.1
+  # Python version: 3.11
   pythonVersion: '3.11'
 
 stages:
@@ -80,7 +80,7 @@ stages:
             displayName: 'Use Python version'
 
           - task: AzureWebApp@1
-            displayName: 'Deploy Azure Web App : apitrade'
+            displayName: 'Deploy Azure Web App : tradinapi'
             inputs:
               azureSubscription: $(azureServiceConnectionId)
               appName: $(webAppName)
