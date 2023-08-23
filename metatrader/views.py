@@ -68,10 +68,38 @@ class AccountApiView(viewsets.ModelViewSet):
 class DetailBalanceApiView(viewsets.ModelViewSet):
     serializer_class = DetailBalanceSerializer
     queryset = DetailBalance.objects.using('postgres').all()
+    
     def create(self, request, *args, **kwargs):
-        serializer = DetailBalanceSerializer(data=request.data)
-        if(serializer.is_valid()):
-            DetailBalance.objects.using('postgres').create(**serializer.validated_data)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else: 
-            return Response({'Error':'Dato no valido'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            data = request.data
+            account_id = data['account']
+            account_instance = Account.objects.using('postgres').get(id=account_id)
+            date = data['date']
+            time = data['time']
+            balance = data['balance']
+            equity = data['equity']
+            freemargin = data['freemargin']
+            freemarginmode = data['freemarginmode']
+            fracemareq = data['fracemareq']
+            flotante = data['flotante']
+            operations = data['operations']
+            fracflotante = data['fracflotante']
+
+            detail_balance = DetailBalance.objects.using('postgres').create(
+                account=account_instance,
+                date=date,
+                time=time,
+                balance=balance,
+                equity=equity,
+                freemargin=freemargin,
+                freemarginmode=freemarginmode,
+                fracemareq=fracemareq,
+                flotante=flotante,
+                operations=operations,
+                fracflotante=fracflotante
+            )
+            return Response({'Message': 'Successful!!'}, status=status.HTTP_201_CREATED)
+        except Account.DoesNotExist:
+            return Response({'Exception Message': 'Account does not exist.'}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'Exception Message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
