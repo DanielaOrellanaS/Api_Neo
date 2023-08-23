@@ -85,7 +85,7 @@ class DetailBalanceApiView(viewsets.ModelViewSet):
             operations = data['operations']
             fracflotante = data['fracflotante']
 
-            detail_balance = DetailBalance.objects.using('postgres').create(
+            DetailBalance.objects.using('postgres').create(
                 account=account_instance,
                 date=date,
                 time=time,
