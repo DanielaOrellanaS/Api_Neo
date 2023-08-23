@@ -24,7 +24,7 @@ class ParesApiView(viewsets.ModelViewSet):
 
 class MonedaApiView(viewsets.ModelViewSet):
     serializer_class = MonedaSerializer
-    queryset = Datatrader1Mtemp.objects.using('postgres').all()
+    queryset = Datatrader1M.objects.using('postgres').all()
     def create(self, request, *args, **kwargs):
         try:
             data=eval(list(request.data)[0].replace('\0', ''))
@@ -37,7 +37,7 @@ class MonedaApiView(viewsets.ModelViewSet):
             close = data['close']
             volume = data['volume']
             tablePar = Pares.objects.using('postgres').get(pares=par)
-            dataInfo = Datatrader1Mtemp(par=tablePar, date=date, time=time, open=open, high=high, low=low, close=close, volume=volume)
+            dataInfo = Datatrader1M(par=tablePar, date=date, time=time, open=open, high=high, low=low, close=close, volume=volume)
             dataInfo.save()
             return Response({'Message':'Succesfull!!'}, status=status.HTTP_201_CREATED)
         except Exception as e:
@@ -100,6 +100,6 @@ class DetailBalanceApiView(viewsets.ModelViewSet):
             )
             return Response({'Message': 'Successful!!'}, status=status.HTTP_201_CREATED)
         except Account.DoesNotExist:
-            return Response({'Exception Message': 'Account does not exist.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'Exception Message': 'Account does not exist'}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'Exception Message': str(e)}, status=status.HTTP_400_BAD_REQUEST)

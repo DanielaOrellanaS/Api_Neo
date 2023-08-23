@@ -11,7 +11,7 @@ class ParesSerializer(serializers.ModelSerializer):
 class MonedaSerializer(serializers.ModelSerializer):
     par = serializers.PrimaryKeyRelatedField(queryset=Pares.objects.using('postgres').all())
     class Meta:
-        model = Datatrader1Mtemp
+        model = Datatrader1M
         fields = '__all__'
 
 class AccountTypeSerializer(serializers.ModelSerializer):
