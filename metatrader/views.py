@@ -65,7 +65,7 @@ class AccountApiView(viewsets.ModelViewSet):
         else: 
             return Response({'Error':'Dato no valido'}, status=status.HTTP_400_BAD_REQUEST)
 
-class DetailBalanceApiView(viewsets.ModelViewSet):
+class DetailBalanceAccountApiView(viewsets.ModelViewSet):
     serializer_class = DetailBalanceSerializer
     queryset = DetailBalance.objects.using('postgres').all()
     
