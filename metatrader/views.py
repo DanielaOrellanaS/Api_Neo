@@ -70,7 +70,7 @@ class DetailBalanceAccountApiView(viewsets.ModelViewSet):
     queryset = DetailBalance.objects.using('postgres').all()
     
     def create(self, request, *args, **kwargs):
-        #try:
+        try:
             data = request.data
             account_id = data['account']
             account_instance = Account.objects.using('postgres').get(id=account_id)
@@ -85,7 +85,7 @@ class DetailBalanceAccountApiView(viewsets.ModelViewSet):
             operations = data['operations']
             fracflotante = data['fracflotante']
 
-            DetailBalance.objects.using('postgres').create(
+            detail_balance = DetailBalance.objects.using('postgres').create(
                 account=account_instance,
                 date=date,
                 time=time,
@@ -98,9 +98,10 @@ class DetailBalanceAccountApiView(viewsets.ModelViewSet):
                 operations=operations,
                 fracflotante=fracflotante
             )
+            detail_balance.save()
             return Response({'Message': 'Successful!!'}, status=status.HTTP_201_CREATED)
-    """
         except Account.DoesNotExist:
             return Response({'Exception Message': 'Account does not exist'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            return Response({'Exception Message': str(e)}, status=status.HTTP_400_BAD_REQUEST)"""
+            return Response({'Exception Message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+

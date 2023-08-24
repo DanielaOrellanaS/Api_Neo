@@ -11,6 +11,6 @@ router.register(r'cuenta', views.AccountApiView, basename='cuenta')
 router.register(r'detallebalance', views.DetailBalanceAccountApiView, basename='detallebalance')
 
 urlpatterns = [
-    path('', include(router.urls))
+    path('', include(router.urls)), 
     ]
     
