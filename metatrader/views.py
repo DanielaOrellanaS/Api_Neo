@@ -68,22 +68,27 @@ class AccountApiView(viewsets.ModelViewSet):
 class DetailBalanceAccountApiView(viewsets.ModelViewSet):
     serializer_class = DetailBalanceSerializer
     queryset = DetailBalance.objects.using('postgres').all()
-    
+
     def create(self, request, *args, **kwargs):
         try:
-            data = request.data
-            account_id = data['account']
-            account_instance = Account.objects.using('postgres').get(id=account_id)
-            date = data['date']
-            time = data['time']
-            balance = data['balance']
-            equity = data['equity']
-            freemargin = data['freemargin']
-            freemarginmode = data['freemarginmode']
-            fracemareq = data['fracemareq']
-            flotante = data['flotante']
-            operations = data['operations']
-            fracflotante = data['fracflotante']
+            #data = request.data
+            data=eval(list(request.data)[0].replace('\0', ''))
+            account_id = data.get('account_id')
+            account_instance = Account.objects.using('postgres').filter(id=account_id).first()
+
+            if account_instance is None:
+                return Response({'Exception Message': 'Account does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
+            date = data.get('date')
+            time = data.get('time')
+            balance = data.get('balance')
+            equity = data.get('equity')
+            freemargin = data.get('freemargin')
+            freemarginmode = data.get('freemarginmode')
+            fracemareq = data.get('fracemareq')
+            flotante = data.get('flotante')
+            operations = data.get('operations')
+            fracflotante = data.get('fracflotante')
 
             detail_balance = DetailBalance.objects.using('postgres').create(
                 account=account_instance,
@@ -99,9 +104,11 @@ class DetailBalanceAccountApiView(viewsets.ModelViewSet):
                 fracflotante=fracflotante
             )
             detail_balance.save()
+
             return Response({'Message': 'Successful!!'}, status=status.HTTP_201_CREATED)
-        except Account.DoesNotExist:
-            return Response({'Exception Message': 'Account does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
         except Exception as e:
             return Response({'Exception Message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
 

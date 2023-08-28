@@ -49,7 +49,6 @@ class Account(models.Model):
         db_table = 'Account'
 
 class DetailBalance(models.Model): 
-    account = models.ForeignKey(Account, on_delete=models.CASCADE, blank=True, null=True)
     date = models.DateField(db_column='Date', blank=True, null=True) 
     time = models.TimeField(db_column='Time', blank=True, null=True)
     balance = models.FloatField(db_column='Balance', blank=True, null=True)
@@ -60,6 +59,7 @@ class DetailBalance(models.Model):
     flotante = models.FloatField(db_column='Flotante', blank=True, null=True)
     operations = models.IntegerField(db_column='Operations', blank=True, null=True)
     fracflotante = models.FloatField(db_column='FracFlotante', blank=True, null=True)
+    account = models.ForeignKey(Account, blank=True, null=True, on_delete=models.CASCADE)
     
     class Meta:
         db_table = 'DetailBalance'

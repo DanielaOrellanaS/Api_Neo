@@ -28,7 +28,7 @@ class AccountSerializer(serializers.ModelSerializer):
         fields = ['id', 'accountType', 'alias']
 
 class DetailBalanceSerializer(serializers.ModelSerializer):
-    account = serializers.PrimaryKeyRelatedField(queryset=Account.objects.using('postgres').all())
+    account_id = serializers.PrimaryKeyRelatedField(queryset=Account.objects.using('postgres').all())
     class Meta:
         model = DetailBalance
         fields = '__all__'
