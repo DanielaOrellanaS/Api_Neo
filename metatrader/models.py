@@ -41,6 +41,7 @@ class AccountType(models.Model):
         db_table = 'AccountType'
         
 class Account(models.Model): 
+    id = models.BigIntegerField(primary_key=True)
     accountType = models.ForeignKey(AccountType, on_delete=models.CASCADE, blank=True, null=True)
     alias = models.CharField(max_length=40) 
     
