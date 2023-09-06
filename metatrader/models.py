@@ -63,3 +63,22 @@ class DetailBalance(models.Model):
     
     class Meta:
         db_table = 'DetailBalance'
+
+class Operation(models.Model): 
+    date = models.DateTimeField(db_column='Date', blank=True, null=True) 
+    ticket = models.BigIntegerField(db_column='Ticket', blank=True, null=True)
+    symbol = models.CharField(db_column='Symbol', max_length=40) 
+    lotes = models.FloatField(db_column='Lotes', blank=True, null=True)
+    type = models.CharField(db_column='Type', max_length=40)
+    dateOpen = models.DateTimeField(db_column='DateOpen', blank=True, null=True)
+    dateClose = models.DateTimeField(db_column='DateClose', blank=True, null=True)
+    openPrice = models.FloatField(db_column='Price', blank=True, null=True)
+    closePrice = models.FloatField(db_column='ClosePrice', blank=True, null=True)
+    magic = models.BigIntegerField(db_column='Magic', blank=True, null=True)
+    sl = models.FloatField(db_column='SL', blank=True, null=True)
+    tp = models.FloatField(db_column='TP', blank=True, null=True)
+    profit = models.FloatField(db_column='Profit', blank=True, null=True)
+    account = models.ForeignKey(Account, blank=True, null=True, on_delete=models.CASCADE)
+    
+    class Meta:
+        db_table = 'Operation'

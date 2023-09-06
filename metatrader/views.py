@@ -8,14 +8,11 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django.urls import reverse
 
-# Create your views here.
 class ParesApiView(viewsets.ModelViewSet):
     serializer_class = ParesSerializer
     queryset = Pares.objects.using('postgres').all()
     def create(self, request, *args, **kwargs):
-        print(request.data)
         serializer = ParesSerializer(data=request.data)
-        print('SERIALIZER: ',serializer)
         if(serializer.is_valid()):
             Pares.objects.using('postgres').create(**serializer.validated_data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -110,5 +107,66 @@ class DetailBalanceAccountApiView(viewsets.ModelViewSet):
         except Exception as e:
             return Response({'Exception Message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-
+class OperationApiView(viewsets.ModelViewSet):
+    serializer_class = OperationSerializer
+    queryset = Operation.objects.using('postgres').all()
+    
+    def create(self, request, *args, **kwargs): 
+        try: 
+            data = eval(list(request.data)[0].replace('\0', ''))
+            account_id = data.get('account_id')
+            account_instance = Account.objects.using('postgres').filter(id=account_id).first()
+            
+            if account_instance is None: 
+                return Response({'Exception Message': 'Account does not exist'}, status=status.HTTP_404_NOT_FOUND)
+            
+            ticket = data.get('ticket')
+            symbol = data.get('symbol')
+            lotes = data.get('lotes')
+            operation_type = data.get('type')
+            dateOpen = data.get('dateOpen')
+            dateClose = data.get('dateClose')
+            openPrice = data.get('openPrice')
+            closePrice = data.get('closePrice')
+            magic = data.get('magic')
+            sl = data.get('sl')
+            tp = data.get('tp')
+            profit = data.get('profit')
+            
+            #Crear la operacion 
+            operation, created = Operation.objects.using('postgres').get_or_create(
+                ticket=ticket,
+                account=account_instance,
+                symbol=symbol, 
+                lotes=lotes, 
+                operation_type=operation_type,
+                dateOpen=dateOpen,
+                dateClose=dateClose,
+                openPrice=openPrice,
+                closePrice=closePrice,
+                magic=magic,
+                sl=sl,
+                tp=tp,
+                profit=profit
+            )
+            
+            #Actualizar la operacion: 
+            if not created: 
+                operation.lotes = lotes
+                operation.dateOpen = dateOpen
+                operation.dateClose = dateClose
+                operation.openPrice = openPrice
+                operation.closePrice = closePrice
+                operation.magic = magic
+                operation.sl = sl
+                operation.tp = tp
+                operation.profit = profit
+            
+            operation.save()
+            
+            return Response({'Message': 'Successful!!'}, status=status.HTTP_201_CREATED)
+        
+        except Exception as e: 
+             return Response({'Exception Message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            
 

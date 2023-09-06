@@ -32,3 +32,9 @@ class DetailBalanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = DetailBalance
         fields = '__all__'
+
+class OperationSerializer(serializers.ModelSerializer):
+    account_id = serializers.PrimaryKeyRelatedField(queryset=Account.objects.using('postgres').all())
+    class Meta: 
+        model = Operation
+        fields = '__all__'
