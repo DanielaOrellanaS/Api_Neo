@@ -123,7 +123,7 @@ class OperationApiView(viewsets.ModelViewSet):
             ticket = data.get('ticket')
             symbol = data.get('symbol')
             lotes = data.get('lotes')
-            operation_type = data.get('type')
+            operationType = data.get('type')
             dateOpen = data.get('dateOpen')
             dateClose = data.get('dateClose')
             openPrice = data.get('openPrice')
@@ -139,7 +139,7 @@ class OperationApiView(viewsets.ModelViewSet):
                 account=account_instance,
                 symbol=symbol, 
                 lotes=lotes, 
-                operation_type=operation_type,
+                operationType=operationType,
                 dateOpen=dateOpen,
                 dateClose=dateClose,
                 openPrice=openPrice,
