@@ -120,6 +120,7 @@ class OperationApiView(viewsets.ModelViewSet):
             if account_instance is None: 
                 return Response({'Exception Message': 'Account does not exist'}, status=status.HTTP_404_NOT_FOUND)
             
+            date = data.get('date')
             ticket = data.get('ticket')
             symbol = data.get('symbol')
             lotes = data.get('lotes')
@@ -135,6 +136,7 @@ class OperationApiView(viewsets.ModelViewSet):
             
             #Crear la operacion 
             operation, created = Operation.objects.using('postgres').get_or_create(
+                date=date,
                 ticket=ticket,
                 account=account_instance,
                 symbol=symbol, 
