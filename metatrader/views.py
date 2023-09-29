@@ -134,26 +134,29 @@ class OperationApiView(viewsets.ModelViewSet):
             tp = data.get('tp')
             profit = data.get('profit')
             
-            #Crear la operacion 
-            operation, created = Operation.objects.using('postgres').get_or_create(
-                date=date,
-                ticket=ticket,
-                account=account_instance,
-                symbol=symbol, 
-                lotes=lotes, 
-                operationType=operationType,
-                dateOpen=dateOpen,
-                dateClose=dateClose,
-                openPrice=openPrice,
-                closePrice=closePrice,
-                magic=magic,
-                sl=sl,
-                tp=tp,
-                profit=profit
-            )
+            # Buscar la operación existente por el ticket
+            operation = Operation.objects.using('postgres').filter(ticket=ticket).first()
             
-            #Actualizar la operacion: 
-            if not created: 
+            if operation is None:
+                # Crear la operación
+                operation = Operation(
+                    date=date,
+                    ticket=ticket,
+                    account=account_instance,
+                    symbol=symbol, 
+                    lotes=lotes, 
+                    operationType=operationType,
+                    dateOpen=dateOpen,
+                    dateClose=dateClose,
+                    openPrice=openPrice,
+                    closePrice=closePrice,
+                    magic=magic,
+                    sl=sl,
+                    tp=tp,
+                    profit=profit
+                )
+            else:
+                # Actualizar la operacion 
                 operation.lotes = lotes
                 operation.dateOpen = dateOpen
                 operation.dateClose = dateClose
@@ -170,5 +173,6 @@ class OperationApiView(viewsets.ModelViewSet):
         
         except Exception as e: 
              return Response({'Exception Message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
             
 
