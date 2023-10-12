@@ -69,7 +69,7 @@ class Operation(models.Model):
     ticket = models.BigIntegerField(db_column='Ticket', blank=True, null=True)
     symbol = models.CharField(db_column='Symbol', max_length=40) 
     lotes = models.FloatField(db_column='Lotes', blank=True, null=True)
-    operationType = models.CharField(db_column='Type', max_length=40)
+    type = models.CharField(db_column='Type', max_length=40)
     dateOpen = models.DateTimeField(db_column='DateOpen', blank=True, null=True)
     dateClose = models.DateTimeField(db_column='DateClose', blank=True, null=True)
     openPrice = models.FloatField(db_column='Price', blank=True, null=True)
@@ -82,3 +82,4 @@ class Operation(models.Model):
     
     class Meta:
         db_table = 'Operation'
+

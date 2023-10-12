@@ -173,6 +173,3 @@ class OperationApiView(viewsets.ModelViewSet):
         
         except Exception as e: 
              return Response({'Exception Message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-            
-
