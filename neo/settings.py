@@ -48,9 +48,11 @@ INSTALLED_APPS = [
 
     #APSS
     'metatrader',
+    'authuser',
     #Rest Framework
     'rest_framework',
     'rest_framework.authtoken',
+    'dj_rest_auth', 
 ]
 
 MIDDLEWARE = [
@@ -90,7 +92,7 @@ WSGI_APPLICATION = 'neo.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'test',
+        'NAME': 'authsystem',
         'USER': 'Neotradingai@severtraderdb',
         'PASSWORD':'TraderResponsable2022@',
         'HOST': 'severtraderdb.postgres.database.azure.com',
