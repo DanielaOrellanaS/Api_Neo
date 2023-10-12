@@ -31,7 +31,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'django-insecure-^hlv4!jfa4kp2p-8)qj5la!%vgoxnah6p1allj-2y*i_)$uj(8'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -52,7 +52,7 @@ INSTALLED_APPS = [
     #Rest Framework
     'rest_framework',
     'rest_framework.authtoken',
-    'dj_rest_auth', 
+    #'dj_rest_auth', 
 ]
 
 MIDDLEWARE = [
