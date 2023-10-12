@@ -92,7 +92,7 @@ WSGI_APPLICATION = 'neo.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'authsystem',
+        'NAME': 'test',
         'USER': 'Neotradingai@severtraderdb',
         'PASSWORD':'TraderResponsable2022@',
         'HOST': 'severtraderdb.postgres.database.azure.com',
