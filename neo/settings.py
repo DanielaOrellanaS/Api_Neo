@@ -48,7 +48,7 @@ INSTALLED_APPS = [
 
     #APSS
     'metatrader',
-    'authuser',
+    #'authuser',
     #Rest Framework
     'rest_framework',
     'rest_framework.authtoken',
