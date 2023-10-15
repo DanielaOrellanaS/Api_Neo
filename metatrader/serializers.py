@@ -38,3 +38,9 @@ class OperationSerializer(serializers.ModelSerializer):
     class Meta: 
         model = Operation
         fields = '__all__'
+
+class IndicadorSerializer(serializers.ModelSerializer):
+    par = serializers.PrimaryKeyRelatedField(queryset=Pares.objects.using('postgres').all())
+    class Meta:
+        model = ResumeIndicador
+        fields = '__all__'

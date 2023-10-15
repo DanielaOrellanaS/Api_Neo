@@ -10,6 +10,7 @@ router.register(r'tipocuenta', views.AccountTypeApiView, basename='tipocuenta')
 router.register(r'cuenta', views.AccountApiView, basename='cuenta')
 router.register(r'detallebalance', views.DetailBalanceAccountApiView, basename='detallebalance')
 router.register(r'operaciones', views.OperationApiView, basename='operaciones')
+router.register(r'neobot', views.robot_neoApiView, basename='neobot')
 
 urlpatterns = [
     path('', include(router.urls)), 

@@ -20,6 +20,16 @@ mimetypes.add_type('text/javascript','.js',True)
 
 from django.contrib.messages import constants as message_constants
 from django.contrib.messages.api import success
+#from databricks import DatabricksConnect
+
+# Configura las credenciales
+#config = {
+#    "host": "https://<tu-cluster>.cloud.databricks.com",
+#    "token": "<tu-token-de-acceso>",
+#}
+#
+## Crea una conexión
+#dbutils = DatabricksConnect(config)
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
