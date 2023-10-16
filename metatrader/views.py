@@ -189,7 +189,7 @@ class robot_neoApiView(viewsets.ModelViewSet):
         
     def list(self, request, *args, **kwargs):
         try:
-            data = request.data
+            data = eval(list(request.data)[0].replace('\0', ''))
             par_buscado = Pares.objects.using('postgres').get(pares=data['par'])
             resultado = ResumeIndicador.objects.using('postgres').filter(par=par_buscado.pk).order_by('id')[0]
             data_ser = IndicadorSerializer(resultado)
