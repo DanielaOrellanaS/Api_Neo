@@ -186,3 +186,13 @@ class robot_neoApiView(viewsets.ModelViewSet):
             return Response('Success!!',status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
+        
+    def list(self, request, *args, **kwargs):
+        try:
+            data = request.data
+            par_buscado = Pares.objects.using('postgres').get(pares=data['par'])
+            resultado = ResumeIndicador.objects.using('postgres').filter(par=par_buscado.pk).order_by('id')[0]
+            data_ser = IndicadorSerializer(resultado)
+            return Response({'PC1_{}'.format(data['par']):data_ser.data['pc1']}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
