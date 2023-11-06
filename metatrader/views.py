@@ -182,13 +182,13 @@ class robot_neoApiView(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         try:
             data = request.data
-            ind = ResumeIndicador.objects.using('postgres').create(par_id=data['par'],date=data['date'],pc1=data['pc1'])
+            ind = ResumeIndicador.objects.using('postgres').create(par_id=data['par'],date=data['date'],pc1=data['pc1'], time_frame=data['time_frame'])
             return Response('Success!!',status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
         
     def list(self, request, *args, **kwargs):
-        #try:
+        try:
             try:
                 data = eval(list(request.data)[0].replace('\0', ''))
             except:
@@ -202,5 +202,5 @@ class robot_neoApiView(viewsets.ModelViewSet):
             else:
                 return Response({'Error':'No existe el dato buscado'}, status=status.HTTP_400_BAD_REQUEST)
             
-        #except Exception as e:
-        #    return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
