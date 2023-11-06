@@ -1,0 +1,280 @@
+[33mcommit 35ebd13c3781f6afdeadbf35d2e58ad065b09fb2[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m)[m
+Author: AdrianEnriquez4505 <adrian.enriquez4505@gmail.com>
+Date:   Mon Nov 6 08:57:30 2023 -0500
+
+    timeframes_indicador
+
+[33mcommit 0e502605defd82bcbc0cd3c7a7215fe4100feb21[m
+Author: AdrianEnriquez4505 <adrian.enriquez4505@gmail.com>
+Date:   Sun Oct 15 20:38:41 2023 -0500
+
+    change request neobot
+
+[33mcommit 727bca28fb44a5533b1e8531dec7744b510fa75a[m
+Author: AdrianEnriquez4505 <adrian.enriquez4505@gmail.com>
+Date:   Sun Oct 15 19:06:59 2023 -0500
+
+    method get in neobot
+
+[33mcommit 6ff86cf09742d804cb96eece81e1a0263ad819da[m
+Author: AdrianEnriquez4505 <adrian.enriquez4505@gmail.com>
+Date:   Sun Oct 15 14:21:51 2023 -0500
+
+    neobot
+
+[33mcommit b17e76b226864f21574ddbc7329b3ffee5e7b90a[m
+Author: DanielaOrellanaS <deorellana@espe.edu.ec>
+Date:   Thu Oct 12 22:16:12 2023 -0500
+
+    update requirements
+
+[33mcommit 5255eb0ce2f7e67af6f618b9f3b676a6505327a6[m
+Author: DanielaOrellanaS <deorellana@espe.edu.ec>
+Date:   Thu Oct 12 22:11:29 2023 -0500
+
+    modify pipeline
+
+[33mcommit cf33caa7d913d7e860d82a99ee39757b8e2e69ce[m
+Author: DanielaOrellanaS <deorellana@espe.edu.ec>
+Date:   Thu Oct 12 22:07:33 2023 -0500
+
+    change pipelines
+
+[33mcommit 3093a3ee982f17b27c21d8d60b064969dccfab38[m
+Merge: fbe5255 52ee1d1
+Author: DanielaOrellanaS <deorellana@espe.edu.ec>
+Date:   Thu Oct 12 15:38:57 2023 -0500
+
+    Merge branch 'main' of https://github.com/AdrianEnriquez4505/Api_Neo
+
+[33mcommit fbe5255e89e9afd4f6cbb6f114630cf711145d72[m
+Author: DanielaOrellanaS <deorellana@espe.edu.ec>
+Date:   Thu Oct 12 15:38:20 2023 -0500
+
+    fix requirements
+
+[33mcommit 52ee1d1e9a063ccad39f0060589616fbf43fb712[m
+Author: AdrianEnriquez4505 <73806971+AdrianEnriquez4505@users.noreply.github.com>
+Date:   Thu Oct 12 15:10:39 2023 -0500
+
+    Update settings.py
+
+[33mcommit 9944bf73ad70c329e36e5be040db0d9835add32a[m
+Author: DanielaOrellanaS <deorellana@espe.edu.ec>
+Date:   Thu Oct 12 14:39:04 2023 -0500
+
+    requirements
+
+[33mcommit f503049a2532ee0f1382430524672287a57beafb[m
+Author: DanielaOrellanaS <deorellana@espe.edu.ec>
+Date:   Thu Oct 12 14:06:10 2023 -0500
+
+    new change api
+
+[33mcommit e91ece05913d5a4323e707adbd1775950eae3faf[m
+Author: DanielaOrellanaS <deorellana@espe.edu.ec>
+Date:   Thu Oct 12 12:47:47 2023 -0500
+
+    modify db test
+
+[33mcommit f1b672baad13e2899824494ac5eb1b72cd1cc4c8[m
+Author: DanielaOrellanaS <deorellana@espe.edu.ec>
+Date:   Thu Oct 12 12:12:38 2023 -0500
+
+    modify name database test
+
+[33mcommit db75dc04383276c9cae296bfbb97d39a8b6cbe86[m
+Author: DanielaOrellanaS <deorellana@espe.edu.ec>
+Date:   Fri Sep 29 08:42:15 2023 -0500
+
+    modify update operation
+
+[33mcommit 7de0c8e50c2821de940426baf0a2a16a5de5ef2c[m
+Author: DanielaOrellanaS <deorellana@espe.edu.ec>
+Date:   Fri Sep 8 09:22:36 2023 -0500
+
+    fix date
+
+[33mcommit 53b35fc4f4d161bdc11306d8a5999e5c2dbdefe0[m
+Author: DanielaOrellanaS <deorellana@espe.edu.ec>
+Date:   Wed Sep 6 22:54:09 2023 -0500
+
+    change name type
+
+[33mcommit 3bb1e6a843a23af259a823b71e1d4a3a64dbbb73[m
+Author: DanielaOrellanaS <deorellana@espe.edu.ec>
+Date:   Wed Sep 6 11:54:15 2023 -0500
+
+    turned off debug
+
+[33mcommit da766b516beb533a992667d8cfe8212f3a82d2fb[m
+Author: DanielaOrellanaS <deorellana@espe.edu.ec>
+Date:   Wed Sep 6 11:36:36 2023 -0500
+
+    implement operations
+
+[33mcommit 2377b77d19f4be429461e48bd6166a84c5ba464f[m
+Author: DanielaOrellanaS <deorellana@espe.edu.ec>
+Date:   Wed Sep 6 11:36:20 2023 -0500
+
+    db migrations - operations
+
+[33mcommit 6967d16222ea37cbdeedee59f22c744e7d95bbb6[m
+Author: DanielaOrellanaS <deorellana@espe.edu.ec>
+Date:   Mon Aug 28 12:41:15 2023 -0500
+
+    fix DetailBalanceApiView
+
+[33mcommit a997cb51b6e013677b9e6bc6ac2ad5d9325d0eb1[m
+Author: DanielaOrellanaS <deorellana@espe.edu.ec>
+Date:   Sun Aug 27 21:41:28 2023 -0500
+
+    add field id (Account)
+
+[33mcommit 050e1c4271e2c41ad32035ba07e9a233cd027247[m
+Author: DanielaOrellanaS <deorellana@espe.edu.ec>
+Date:   Thu Aug 24 08:42:45 2023 -0500
+
+    turned off
+
+[33mcommit aa26bd97f2e61f04f8cd0926e6508f08a7516e6d[m
+Author: DanielaOrellanaS <deorellana@espe.edu.ec>
+Date:   Thu Aug 24 08:41:37 2023 -0500
+
+    change post method  (DetailBalance)
+
+[33mcommit 622a95f96fa9cb6027f7dd99d90b8403a3f2613c[m
+Author: DanielaOrellanaS <deorellana@espe.edu.ec>
+Date:   Wed Aug 23 13:43:11 2023 -0500
+
+    test
+
+[33mcommit 4c4640b3990868f21dc05080aae4c8fb75e7f652[m
+Author: DanielaOrellanaS <deorellana@espe.edu.ec>
+Date:   Wed Aug 23 13:26:46 2023 -0500
+
+    change endpoint detail balance
+
+[33mcommit 3c30a02efcbb092f4d603b7552e37795389baf4b[m
+Author: DanielaOrellanaS <deorellana@espe.edu.ec>
+Date:   Wed Aug 23 11:32:35 2023 -0500
+
+    modify table (production)
+
+[33mcommit 3491678d5a15de4a429779a80a06bf158da8592b[m
+Author: DanielaOrellanaS <deorellana@espe.edu.ec>
+Date:   Wed Aug 23 10:29:20 2023 -0500
+
+    improve code files
+
+[33mcommit b0a2acf17eced696083bee2bf8f95cc0b921b351[m
+Author: DanielaOrellanaS <deorellana@espe.edu.ec>
+Date:   Wed Aug 23 10:29:08 2023 -0500
+
+    improve code
+
+[33mcommit 7ef42de83968d9f5fa2b2733daa23ecef903a2db[m
+Author: DanielaOrellanaS <deorellana@espe.edu.ec>
+Date:   Wed Aug 23 10:25:13 2023 -0500
+
+    post for DetailBalance
+
+[33mcommit 27634b33ded1057577c3b7358f9cdb8c0817c31a[m
+Author: DanielaOrellanaS <deorellana@espe.edu.ec>
+Date:   Mon Aug 21 17:27:40 2023 -0500
+
+    change database
+
+[33mcommit bf5c10323f637476e296e1aec54946985eec016e[m
+Merge: 18ab183 9a3fd16
+Author: DanielaOrellanaS <deorellana@espe.edu.ec>
+Date:   Mon Aug 21 17:14:31 2023 -0500
+
+    Merge branch 'main' of https://github.com/AdrianEnriquez4505/Api_Neo
+
+[33mcommit 18ab183be244e0ffa90d1e87be66c60534d1bc17[m
+Author: DanielaOrellanaS <deorellana@espe.edu.ec>
+Date:   Mon Aug 21 17:14:26 2023 -0500
+
+    add new models
+
+[33mcommit 9a3fd16dc0d0571d60d98bf89b9dbd0551e93b0b[m
+Author: AdrianEnriquez4505 <73806971+AdrianEnriquez4505@users.noreply.github.com>
+Date:   Mon Aug 21 12:51:25 2023 -0500
+
+    Set up CI with Azure Pipelines
+    
+    [skip ci]
+
+[33mcommit f3518b82faca804e714773a8b8957c1dcd6ebb89[m
+Author: AdrianEnriquez4505 <73806971+AdrianEnriquez4505@users.noreply.github.com>
+Date:   Mon Aug 21 11:36:44 2023 -0500
+
+    Set up CI with Azure Pipelines
+    
+    [skip ci]
+
+[33mcommit 8a07db40195abb5c8faf514c2d2eb169ae1c91ad[m
+Author: DanielaOrellanaS <deorellana@espe.edu.ec>
+Date:   Wed Aug 16 13:12:40 2023 -0500
+
+    convert QueryDict
+
+[33mcommit c2cea0fbabc8329fb4f27c7003c4c466ef373bf4[m
+Author: DanielaOrellanaS <deorellana@espe.edu.ec>
+Date:   Wed Aug 16 12:54:11 2023 -0500
+
+    fix1
+
+[33mcommit 3ecca84371ef63e1cc7fea71073f588918070b46[m
+Author: DanielaOrellanaS <deorellana@espe.edu.ec>
+Date:   Wed Aug 16 12:54:02 2023 -0500
+
+    fix
+
+[33mcommit b2bfa10307c6cc559593df2478fc905002c866fc[m
+Author: DanielaOrellanaS <deorellana@espe.edu.ec>
+Date:   Wed Aug 16 12:49:11 2023 -0500
+
+    dict
+
+[33mcommit 7f14766c577386cfa33862665788c22683218641[m
+Author: DanielaOrellanaS <deorellana@espe.edu.ec>
+Date:   Wed Aug 16 12:44:22 2023 -0500
+
+    new message
+
+[33mcommit 32096fbb323c22e02a75787c106dcb9234254563[m
+Author: AdrianEnriquez4505 <adrian.enriquez4505@gmail.com>
+Date:   Wed Aug 16 11:21:28 2023 -0500
+
+    static file
+
+[33mcommit 8c69dfe9c15d41a63f0de23c74e23746f177e319[m
+Author: AdrianEnriquez4505 <adrian.enriquez4505@gmail.com>
+Date:   Wed Aug 16 11:12:48 2023 -0500
+
+    change neo
+
+[33mcommit 9a6d75f74fd9a0b197b78e535778118c5f5c4ee3[m
+Author: AdrianEnriquez4505 <adrian.enriquez4505@gmail.com>
+Date:   Wed Aug 16 11:10:35 2023 -0500
+
+    settings aws
+
+[33mcommit 03e97180b3f25e5c02f8b8db2ffb0a2045c39f29[m
+Author: AdrianEnriquez4505 <73806971+AdrianEnriquez4505@users.noreply.github.com>
+Date:   Wed Aug 16 10:56:34 2023 -0500
+
+    Set up CI with Azure Pipelines
+    
+    [skip ci]
+
+[33mcommit fbdc20860f612832baa75c89d9676676dd88a85f[m
+Author: AdrianEnriquez4505 <73806971+AdrianEnriquez4505@users.noreply.github.com>
+Date:   Wed Aug 16 10:42:27 2023 -0500
+
+    Delete azure-pipelines.yml
+
+[33mcommit 20a56187a578d59cc3304ca069a74d2ae5f19bb4[m
+Author: DanielaOrellanaS <deorellana@espe.edu
