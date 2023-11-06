@@ -88,6 +88,7 @@ class ResumeIndicador(models.Model):
     par = models.ForeignKey(Pares, blank=True, null=True, on_delete=models.CASCADE)
     date = models.DateTimeField(db_column='Date', blank=True, null=True)
     pc1 = models.FloatField(db_column='PC1',blank=True, null=True)
+    time_frame = models.IntegerField(db_column='time_frame', blank=True, null=True)
 
     class Meta:
         db_table = 'IndicadorResumen'
