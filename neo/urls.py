@@ -22,6 +22,7 @@ from django.views.static import serve
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('metatrader.urls')),
-    path('auth', include('authuser.urls')),
+    path('auth/', include('authuser.urls')),
+    path('authapi/', include('dj_rest_auth.urls')),
     re_path(r'^static/(?P<path>.*)$', serve, {'document_root':settings.STATIC_ROOT})
 ]

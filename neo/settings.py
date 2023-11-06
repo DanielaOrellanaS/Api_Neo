@@ -123,6 +123,9 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 100
 }
 
+AUTHENTICATION_CLASSES = (
+    'dj_rest_auth.authentication.AllAuthJWTAuthentication',
+)
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

@@ -9,3 +9,13 @@ class UserProfileSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
         fields = ['id','email','username','is_active','password']
+
+class CustomLoginSerializer(LoginSerializer):
+    username = serializers.CharField(required=True)
+    password = serializers.CharField(required=True, style={'input_type':'password'})
+    email = serializers.HiddenField(default=None)
+
+    def validate(self, attrs):
+        if 'username' in attrs and attrs['username'] == '':
+            raise serializers.ValidationError('The field "username" is required.')
+        return super().validate(attrs)

@@ -10,7 +10,14 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django.urls import reverse
 
-# Create your views here.
 class UserApiView(viewsets.ModelViewSet):
     serializer_class = UserProfileSerializer
     queryset = User.objects.all()
+    def create(self, request, *args, **kwargs):
+        data=request.data
+        user=User(username=data['username'], email=data['email'])
+        user.set_password(data['password'])
+        user.save()
+        return Response('User create', status=status.HTTP_201_CREATED)
+    
+    

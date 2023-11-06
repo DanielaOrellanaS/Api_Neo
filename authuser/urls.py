@@ -1,6 +1,7 @@
 from django.urls import path, include
 from authuser import views
 from rest_framework import routers
+from dj_rest_auth.views import LoginView
 
 # routes endpoints
 router = routers.DefaultRouter()
