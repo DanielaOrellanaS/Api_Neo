@@ -18,11 +18,13 @@ from django.contrib import admin
 from django.urls import path, include, re_path
 from django.conf import settings
 from django.views.static import serve
+from authuser.views import get_csrf_token
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('metatrader.urls')),
     path('auth/', include('authuser.urls')),
     path('authapi/', include('dj_rest_auth.urls')),
+    path('get-csrf-token/', get_csrf_token, name='get-csrf-token'),
     re_path(r'^static/(?P<path>.*)$', serve, {'document_root':settings.STATIC_ROOT})
 ]
