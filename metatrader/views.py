@@ -63,7 +63,7 @@ class AccountApiView(viewsets.ModelViewSet):
         else: 
             return Response({'Error':'Dato no valido'}, status=status.HTTP_400_BAD_REQUEST)
 
-@csrf_exempt
+#@csrf_exempt
 class DetailBalanceAccountApiView(viewsets.ModelViewSet):
     serializer_class = DetailBalanceSerializer
     queryset = DetailBalance.objects.using('postgres').all()
@@ -77,40 +77,40 @@ class DetailBalanceAccountApiView(viewsets.ModelViewSet):
 
             if account_instance is None:
                 return Response({'Exception Message': 'Account does not exist'}, status=status.HTTP_404_NOT_FOUND)
-
-            date = data.get('date')
-            time = data.get('time')
-            balance = data.get('balance')
-            equity = data.get('equity')
-            freemargin = data.get('freemargin')
-            freemarginmode = data.get('freemarginmode')
-            fracemareq = data.get('fracemareq')
-            flotante = data.get('flotante')
-            operations = data.get('operations')
-            fracflotante = data.get('fracflotante')
-
-            detail_balance = DetailBalance.objects.using('postgres').create(
-                account=account_instance,
-                date=date,
-                time=time,
-                balance=balance,
-                equity=equity,
-                freemargin=freemargin,
-                freemarginmode=freemarginmode,
-                fracemareq=fracemareq,
-                flotante=flotante,
-                operations=operations,
-                fracflotante=fracflotante
-            )
-            detail_balance.save()
-
-            return Response({'Message': 'Successful!!'}, status=status.HTTP_201_CREATED)
+            else:
+                date = data.get('date')
+                time = data.get('time')
+                balance = data.get('balance')
+                equity = data.get('equity')
+                freemargin = data.get('freemargin')
+                freemarginmode = data.get('freemarginmode')
+                fracemareq = data.get('fracemareq')
+                flotante = data.get('flotante')
+                operations = data.get('operations')
+                fracflotante = data.get('fracflotante')
+    
+                detail_balance = DetailBalance.objects.using('postgres').create(
+                    account=account_instance,
+                    date=date,
+                    time=time,
+                    balance=balance,
+                    equity=equity,
+                    freemargin=freemargin,
+                    freemarginmode=freemarginmode,
+                    fracemareq=fracemareq,
+                    flotante=flotante,
+                    operations=operations,
+                    fracflotante=fracflotante
+                )
+                detail_balance.save()
+    
+                return Response({'Message': 'Successful!!'}, status=status.HTTP_201_CREATED)
 
         except Exception as e:
             return Response({'Exception Message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-@csrf_exempt
+#@csrf_exempt
 class OperationApiView(viewsets.ModelViewSet):
     serializer_class = OperationSerializer
     queryset = Operation.objects.using('postgres').all()
