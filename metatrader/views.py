@@ -186,25 +186,26 @@ class robot_neoApiView(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         try:
             data = request.data
-            ind = ResumeIndicador.objects.using('postgres').create(par_id=data['par'],date=data['date'],pc1=data['pc1'])
+            ind = ResumeIndicador.objects.using('postgres').create(par_id=data['par'],date=data['date'],pc1=data['pc1'], time_frame=data['time_frame'])
             return Response('Success!!',status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
         
     def list(self, request, *args, **kwargs):
-        #try:
+        try:
             try:
                 data = eval(list(request.data)[0].replace('\0', ''))
             except:
                 data = request.data
            
             par_buscado = Pares.objects.using('postgres').get(pares=data['par'])
+
             resultado = ResumeIndicador.objects.using('postgres').filter(par=par_buscado.pk, time_frame=data['time_frame']).order_by('id')
             if len(resultado)>0:
-                data_ser = IndicadorSerializer(resultado[0])
+                data_ser = IndicadorSerializer(list(resultado)[-1])
                 return Response({'PC1_{}'.format(data['par']):data_ser.data['pc1']}, status=status.HTTP_200_OK)
             else:
                 return Response({'Error':'No existe el dato buscado'}, status=status.HTTP_400_BAD_REQUEST)
             
-        #except Exception as e:
-        #    return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
