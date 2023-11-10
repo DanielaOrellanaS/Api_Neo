@@ -196,10 +196,10 @@ class robot_neoApiView(viewsets.ModelViewSet):
            
             par_buscado = Pares.objects.using('postgres').get(pares=data['par'])
 
-            resultado = ResumeIndicador.objects.using('postgres').filter(par=par_buscado.pk, time_frame=data['time_frame']).order_by('id')
+            resultado = list(ResumeIndicador.objects.using('postgres').filter(par=par_buscado.pk, time_frame=data['time_frame']).order_by('id').values())
             if len(resultado)>0:
-                data_ser = IndicadorSerializer(list(resultado)[-1])
-                return Response({'PC1_{}'.format(data['par']):data_ser.data['pc1']}, status=status.HTTP_200_OK)
+                data_ser = resultado[-1]
+                return Response({'PC1_{}'.format(data['par']):data_ser['pc1']}, status=status.HTTP_200_OK)
             else:
                 return Response({'Error':'No existe el dato buscado'}, status=status.HTTP_400_BAD_REQUEST)
             
