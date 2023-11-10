@@ -8,6 +8,7 @@ router = routers.DefaultRouter()
 router.register(r'user', views.UserApiView, basename='user')
 
 urlpatterns = [
-    path('', include(router.urls)), 
+    path('', include(router.urls)),
+    path('rest-auth/login/', LoginView.as_view(), name='rest_login')
     ]
     

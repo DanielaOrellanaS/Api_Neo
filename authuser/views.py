@@ -15,12 +15,12 @@ from django.urls import reverse
 class UserApiView(viewsets.ModelViewSet):
     serializer_class = UserProfileSerializer
     queryset = User.objects.all()
-    def create(self, request, *args, **kwargs):
-        data=request.data
-        user=User(username=data['username'], email=data['email'])
-        user.set_password(data['password'])
-        user.save()
-        return Response('User create', status=status.HTTP_201_CREATED)
+    #def create(self, request, *args, **kwargs):
+    #    data=request.data
+    #    user=User(username=data['username'], email=data['email'])
+    #    user.set_password(data['password'])
+    #    user.save()
+    #    return Response('User create', status=status.HTTP_201_CREATED)
     
 def get_csrf_token(request):
     csrf_token = get_token(request)
