@@ -67,6 +67,15 @@ class AccountApiView(viewsets.ModelViewSet):
 class DetailBalanceAccountApiView(viewsets.ModelViewSet):
     serializer_class = DetailBalanceSerializer
     queryset = DetailBalance.objects.using('postgres').all()
+    
+    def list(self, request, *args, **kwargs):
+        data = request.data 
+        resultado = list(DetailBalance.objects.using('postgres').filter(account_id=data['account_id']).order_by('id').values())
+        if len(resultado)>0:
+            data_ser = resultado[-1]
+            return Response(data_ser, status=status.HTTP_200_OK)
+        else:
+            return Response({'Error':'No existe la cuenta buscada'}, status=status.HTTP_400_BAD_REQUEST)
 
     def create(self, request, *args, **kwargs):
         try:
