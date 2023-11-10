@@ -7,6 +7,7 @@ import json
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
 
 class ParesApiView(viewsets.ModelViewSet):
     serializer_class = ParesSerializer
@@ -62,6 +63,7 @@ class AccountApiView(viewsets.ModelViewSet):
         else: 
             return Response({'Error':'Dato no valido'}, status=status.HTTP_400_BAD_REQUEST)
 
+@csrf_exempt
 class DetailBalanceAccountApiView(viewsets.ModelViewSet):
     serializer_class = DetailBalanceSerializer
     queryset = DetailBalance.objects.using('postgres').all()
@@ -107,6 +109,8 @@ class DetailBalanceAccountApiView(viewsets.ModelViewSet):
         except Exception as e:
             return Response({'Exception Message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+
+@csrf_exempt
 class OperationApiView(viewsets.ModelViewSet):
     serializer_class = OperationSerializer
     queryset = Operation.objects.using('postgres').all()
