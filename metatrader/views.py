@@ -69,13 +69,19 @@ class DetailBalanceAccountApiView(viewsets.ModelViewSet):
     queryset = DetailBalance.objects.using('postgres').all()
     
     def list(self, request, *args, **kwargs):
-        data = request.data 
-        resultado = list(DetailBalance.objects.using('postgres').filter(account_id=data['account_id']).order_by('id').values())
-        if len(resultado)>0:
-            data_ser = resultado[-1]
-            return Response(data_ser, status=status.HTTP_200_OK)
+        account_id = self.request.query_params.get('account_id', None)
+        if account_id is not None:
+            resultado = list(DetailBalance.objects.using('postgres').filter(account_id=account_id).order_by('id').values())
+            if len(resultado) > 0:
+                data_ser = resultado[-1]
+                print('DetailBalance list success:', data_ser)  # Agregado para imprimir en la consola
+                return Response(data_ser, status=status.HTTP_200_OK)
+            else:
+                print('Error: No existe la cuenta buscada')  # Agregado para imprimir en la consola
+                return Response({'Error': 'No existe la cuenta buscada'}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({'Error':'No existe la cuenta buscada'}, status=status.HTTP_400_BAD_REQUEST)
+            print('Error: No se proporcionó el parámetro account_id')  # Agregado para imprimir en la consola
+            return Response({'Error': 'No se proporcionó el parámetro account_id'}, status=status.HTTP_400_BAD_REQUEST)
 
     def create(self, request, *args, **kwargs):
         try:
