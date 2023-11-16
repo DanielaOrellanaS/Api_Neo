@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
+from django.db.models import Count, Max, F
 from rest_framework import status, viewsets
 from metatrader.models import *
 from metatrader.serializers import *
@@ -74,13 +75,13 @@ class DetailBalanceAccountApiView(viewsets.ModelViewSet):
             resultado = list(DetailBalance.objects.using('postgres').filter(account_id=account_id).order_by('id').values())
             if len(resultado) > 0:
                 data_ser = resultado[-1]
-                print('DetailBalance list success:', data_ser)  # Agregado para imprimir en la consola
+                print('DetailBalance list success:', data_ser)  
                 return Response(data_ser, status=status.HTTP_200_OK)
             else:
-                print('Error: No existe la cuenta buscada')  # Agregado para imprimir en la consola
+                print('Error: No existe la cuenta buscada') 
                 return Response({'Error': 'No existe la cuenta buscada'}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            print('Error: No se proporcionó el parámetro account_id')  # Agregado para imprimir en la consola
+            print('Error: No se proporcionó el parámetro account_id') 
             return Response({'Error': 'No se proporcionó el parámetro account_id'}, status=status.HTTP_400_BAD_REQUEST)
 
     def create(self, request, *args, **kwargs):
@@ -125,11 +126,12 @@ class DetailBalanceAccountApiView(viewsets.ModelViewSet):
             return Response({'Exception Message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
+### OPERATIONS ###
+
 #@csrf_exempt
 class OperationApiView(viewsets.ModelViewSet):
     serializer_class = OperationSerializer
     queryset = Operation.objects.using('postgres').all()
-    
     def create(self, request, *args, **kwargs): 
         try: 
             data = eval(list(request.data)[0].replace('\0', ''))
@@ -193,6 +195,54 @@ class OperationApiView(viewsets.ModelViewSet):
         except Exception as e: 
              return Response({'Exception Message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+class OpenOperationApiView(viewsets.ModelViewSet):
+    serializer_class = OperationSerializer
+    queryset = Operation.objects.using('postgres').all()
+    
+    def list(self, request, *args, **kwargs):
+        account_id = self.request.query_params.get('account_id', None)
+        if account_id is not None:
+            latest_operations = (
+                Operation.objects.using('postgres')
+                .filter(account_id=account_id, dateClose='1970-01-01 00:00')
+                .values('symbol', 'type', 'lotes', 'dateOpen', 'dateClose', 'openPrice', 'closePrice', 'profit', 'tp', 'sl')
+            )
+            return Response(latest_operations, status=status.HTTP_200_OK)
+        else:
+            return Response({'Error': 'No se proporcionó el parámetro account_id'}, status=status.HTTP_400_BAD_REQUEST)
+
+class CloseOperationApiView(viewsets.ModelViewSet):
+    serializer_class = OperationSerializer
+    queryset = Operation.objects.using('postgres').all()
+    
+    def list(self, request, *args, **kwargs):
+        account_id = self.request.query_params.get('account_id', None)
+        if account_id is not None:
+            # 10 registros por cuenta 
+            closed_operations = (
+                Operation.objects.using('postgres')
+                .filter(account_id=account_id)
+                .exclude(dateClose='1970-01-01 00:00')
+                .order_by('-dateClose')[:10] 
+                .values('symbol', 'type', 'lotes', 'dateOpen', 'dateClose', 'openPrice', 'closePrice', 'profit', 'tp', 'sl')
+            )
+            return Response(closed_operations, status=status.HTTP_200_OK)
+        else:
+            return Response({'Error': 'No se proporcionó el parámetro account_id'}, status=status.HTTP_400_BAD_REQUEST)
+        
+class OperationCountApiView(viewsets.ModelViewSet):
+    serializer_class = OperationSerializer
+    queryset = Operation.objects.using('postgres').all()
+    
+    def list(self, request, *args, **kwargs):
+        open_operations_count = (
+            Operation.objects.using('postgres')
+            .filter(dateClose='1970-01-01 00:00:00')
+            .values('symbol')
+            .annotate(open_operations=Count('id'))
+        )
+        return Response(open_operations_count)
+    
 
 class robot_neoApiView(viewsets.ModelViewSet):
     serializer_class = IndicadorSerializer

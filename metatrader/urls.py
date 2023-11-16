@@ -10,6 +10,9 @@ router.register(r'tipocuenta', views.AccountTypeApiView, basename='tipocuenta')
 router.register(r'cuenta', views.AccountApiView, basename='cuenta')
 router.register(r'detallebalance', views.DetailBalanceAccountApiView, basename='detallebalance')
 router.register(r'operaciones', views.OperationApiView, basename='operaciones')
+router.register(r'countoperaciones', views.OperationCountApiView, basename='countoperaciones')
+router.register(r'operacionesabiertas', views.OpenOperationApiView, basename='operacionesabiertas')
+router.register(r'operacionescerradas', views.CloseOperationApiView, basename='operacionescerradas')
 router.register(r'neobot', views.robot_neoApiView, basename='neobot')
 
 urlpatterns = [
