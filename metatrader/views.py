@@ -8,6 +8,7 @@ import json
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django.urls import reverse
+from rest_framework import generics
 from django.views.decorators.csrf import csrf_exempt
 
 class ParesApiView(viewsets.ModelViewSet):
@@ -21,6 +22,18 @@ class ParesApiView(viewsets.ModelViewSet):
         else:
             return Response({'Error':'Dato no valido'}, status=status.HTTP_400_BAD_REQUEST)
 
+    def list(self, request, *args, **kwargs):
+        id = self.request.query_params.get('id', None)
+        if id is not None:
+            par_name = (
+                Pares.objects.using('postgres')
+                .filter(id=id)
+                .values('id', 'pares')
+            )
+            return Response(par_name, status=status.HTTP_200_OK)
+        else:
+            return Response({'Error': 'No se proporcionó el parámetro account_id'}, status=status.HTTP_400_BAD_REQUEST)
+        
 class MonedaApiView(viewsets.ModelViewSet):
     serializer_class = MonedaSerializer
     queryset = Datatrader1M.objects.using('postgres').all()
@@ -274,3 +287,35 @@ class robot_neoApiView(viewsets.ModelViewSet):
             
         except Exception as e:
             return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
+        
+
+class LastIndicatorApiView(viewsets.ModelViewSet):
+    serializer_class = IndicadorSerializer
+    def get_queryset(self):
+        last_indicators = (
+            ResumeIndicador.objects.using('postgres')
+            .values('par_id')
+            .annotate(last_id=Max('id'))
+            .values('last_id')
+        )
+
+        indicators_data = (
+            ResumeIndicador.objects.using('postgres')
+            .filter(id__in=last_indicators)
+        )
+
+        return indicators_data
+
+class UserFavAccountsApiView(viewsets.ModelViewSet):
+    serializer_class = UserFavAccountsSerializer
+    queryset = UserFavAccount.objects.using('postgres').all()
+
+    def create(self, request, *args, **kwargs):
+        serializer = UserFavAccountsSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            UserFavAccount.objects.using('postgres').create(**serializer.validated_data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response({'Error':'Dato no valido'}, status=status.HTTP_400_BAD_REQUEST)
+        

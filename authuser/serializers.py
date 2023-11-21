@@ -18,3 +18,5 @@ class CustomLoginSerializer(LoginSerializer):
         if 'username' in attrs and attrs['username'] == '':
             raise serializers.ValidationError('The field "username" is required.')
         return super().validate(attrs)
+    
+    

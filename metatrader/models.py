@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User  
 
 # Create your models here.
 class Pares(models.Model):
@@ -9,26 +10,26 @@ class Pares(models.Model):
         db_table = 'pares'
 
 class Datatrader1Mtemp(models.Model):
-    date = models.DateField(db_column='Date', blank=True, null=True)  # Field name made lowercase.
-    time = models.TimeField(db_column='Time', blank=True, null=True)  # Field name made lowercase.
-    open = models.FloatField(db_column='Open', blank=True, null=True)  # Field name made lowercase.
-    high = models.FloatField(db_column='High', blank=True, null=True)  # Field name made lowercase.
-    low = models.FloatField(db_column='Low', blank=True, null=True)  # Field name made lowercase.
-    close = models.FloatField(db_column='Close', blank=True, null=True)  # Field name made lowercase.
-    volume = models.BigIntegerField(db_column='Volume', blank=True, null=True)  # Field name made lowercase.
+    date = models.DateField(db_column='Date', blank=True, null=True)  
+    time = models.TimeField(db_column='Time', blank=True, null=True)  
+    open = models.FloatField(db_column='Open', blank=True, null=True)  
+    high = models.FloatField(db_column='High', blank=True, null=True)  
+    low = models.FloatField(db_column='Low', blank=True, null=True)  
+    close = models.FloatField(db_column='Close', blank=True, null=True)  
+    volume = models.BigIntegerField(db_column='Volume', blank=True, null=True)  
     par = models.ForeignKey(Pares, blank=True, null=True, on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'DataTrader1mTemp'
 
 class Datatrader1M(models.Model):
-    date = models.DateField(db_column='Date', blank=True, null=True)  # Field name made lowercase.
-    time = models.TimeField(db_column='Time', blank=True, null=True)  # Field name made lowercase.
-    open = models.FloatField(db_column='Open', blank=True, null=True)  # Field name made lowercase.
-    high = models.FloatField(db_column='High', blank=True, null=True)  # Field name made lowercase.
-    low = models.FloatField(db_column='Low', blank=True, null=True)  # Field name made lowercase.
-    close = models.FloatField(db_column='Close', blank=True, null=True)  # Field name made lowercase.
-    volume = models.BigIntegerField(db_column='Volume', blank=True, null=True)  # Field name made lowercase.
+    date = models.DateField(db_column='Date', blank=True, null=True)  
+    time = models.TimeField(db_column='Time', blank=True, null=True)  
+    open = models.FloatField(db_column='Open', blank=True, null=True)  
+    high = models.FloatField(db_column='High', blank=True, null=True)  
+    low = models.FloatField(db_column='Low', blank=True, null=True)  
+    close = models.FloatField(db_column='Close', blank=True, null=True)  
+    volume = models.BigIntegerField(db_column='Volume', blank=True, null=True)  
     par = models.ForeignKey(Pares, blank=True, null=True, on_delete=models.CASCADE)
 
     class Meta:
@@ -92,3 +93,11 @@ class ResumeIndicador(models.Model):
 
     class Meta:
         db_table = 'IndicadorResumen'
+        
+class UserFavAccount(models.Model): 
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, blank=True, null=True)
+    user = models.CharField(max_length=4)   
+    group = models.IntegerField(db_column='Group', blank=True, null=True)
+    class Meta:
+        db_table = 'UserFavAccount'
+        

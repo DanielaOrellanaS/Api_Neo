@@ -14,6 +14,8 @@ router.register(r'countoperaciones', views.OperationCountApiView, basename='coun
 router.register(r'operacionesabiertas', views.OpenOperationApiView, basename='operacionesabiertas')
 router.register(r'operacionescerradas', views.CloseOperationApiView, basename='operacionescerradas')
 router.register(r'neobot', views.robot_neoApiView, basename='neobot')
+router.register(r'last_indicator', views.LastIndicatorApiView, basename='last_indicator')
+router.register(r'cuentafavorita', views.UserFavAccountsApiView, basename='cuentasfavoritas')
 
 urlpatterns = [
     path('', include(router.urls)), 

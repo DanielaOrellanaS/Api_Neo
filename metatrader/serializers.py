@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from rest_framework.fields import empty
 from metatrader.models import *
+from authuser.serializers import UserProfileSerializer
 
 class ParesSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
@@ -44,3 +45,9 @@ class IndicadorSerializer(serializers.ModelSerializer):
     class Meta:
         model = ResumeIndicador
         fields = '__all__'
+        
+class UserFavAccountsSerializer(serializers.ModelSerializer):
+    account = serializers.PrimaryKeyRelatedField(queryset=Account.objects.using('postgres').all()) 
+    class Meta:
+        model = UserFavAccount
+        fields = ['account', 'user', 'group']
