@@ -1,8 +1,10 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
-from django.db.models import Count, Max, F
+from django.db.models import Count, Max, Min, F
+from datetime import datetime, timedelta
 from rest_framework import status, viewsets
 from metatrader.models import *
+from django.db.models.functions import TruncDate
 from metatrader.serializers import *
 import json
 from rest_framework.response import Response
@@ -138,6 +140,37 @@ class DetailBalanceAccountApiView(viewsets.ModelViewSet):
         except Exception as e:
             return Response({'Exception Message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+class DetailBalanceDayApiView(viewsets.ModelViewSet):
+    serializer_class = DetailBalanceSerializer
+    queryset = DetailBalance.objects.using('postgres').all()
+
+    def list(self, request, *args, **kwargs):
+        account_id = self.request.query_params.get('account_id', None)
+        
+        if account_id is not None:
+            # Balance actual (último registro ingresado)
+            current_balance = DetailBalance.objects.using('postgres') \
+                .filter(account_id=account_id, date__lte=datetime.now()) \
+                .order_by('-date', '-time') \
+                .first()
+            current_date = datetime.now().date()
+
+            # Balance del cierre del día anterior
+            previous_date = current_date - timedelta(days=1)
+            previous_closing_balance = DetailBalance.objects.using('postgres') \
+                .filter(account_id=account_id, date=previous_date) \
+                .order_by('-date', '-time') \
+                .values('balance') \
+                .first()
+
+            result = {
+                'current_balance': current_balance.balance if current_balance else None,
+                'previous_closing_balance': previous_closing_balance['balance'] if previous_closing_balance else None
+            }
+
+            return Response(result, status=status.HTTP_200_OK)
+        
+        return Response({'Error': 'No se proporcionó el parámetro account_id'}, status=status.HTTP_400_BAD_REQUEST)
 
 ### OPERATIONS ###
 
