@@ -281,14 +281,18 @@ class OperationCountApiView(viewsets.ModelViewSet):
     queryset = Operation.objects.using('postgres').all()
     
     def list(self, request, *args, **kwargs):
-        open_operations_count = (
-            Operation.objects.using('postgres')
-            .filter(dateClose='1970-01-01 00:00:00')
-            .values('symbol')
-            .annotate(open_operations=Count('id'))
-        )
-        return Response(open_operations_count)
-    
+        account_ids = Account.objects.using('postgres').values_list('id', flat=True)
+        operations_count_by_account = {}
+        for account_id in account_ids:
+            operations_for_account = (
+                Operation.objects.using('postgres')
+                .filter(account_id=account_id, dateClose='1970-01-01 00:00:00')
+                .values('symbol')
+                .annotate(open_operations=Count('id'))
+            )
+            operations_count_by_account[account_id] = list(operations_for_account)
+        
+        return Response(operations_count_by_account)
 
 class robot_neoApiView(viewsets.ModelViewSet):
     serializer_class = IndicadorSerializer
