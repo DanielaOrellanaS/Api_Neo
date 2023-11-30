@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from rest_framework import status, viewsets
 from metatrader.models import *
 from django.db.models.functions import TruncDate
+from django.utils.dateparse import parse_date
 from metatrader.serializers import *
 import json
 from rest_framework.response import Response
@@ -359,6 +360,16 @@ class UserFavAccountsApiView(viewsets.ModelViewSet):
 class EventsApiView(viewsets.ModelViewSet):
     serializer_class = EventsSerializer
     queryset = Events.objects.using('postgres').all()
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        fechas = self.request.query_params.getlist('fecha', None)
+        if fechas:
+            parsed_dates = [parse_date(fecha) for fecha in fechas if parse_date(fecha)]
+            if parsed_dates:
+                queryset = queryset.filter(fecha__in=parsed_dates)
+        return queryset
+
     def create(self, request, *args, **kwargs):
         serializer = EventsSerializer(data=request.data)
         if(serializer.is_valid()):
