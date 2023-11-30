@@ -37,7 +37,6 @@ class Datatrader1M(models.Model):
 
 class AccountType(models.Model): 
     description = models.CharField(max_length=40) 
-    
     class Meta:
         db_table = 'AccountType'
         
@@ -83,8 +82,7 @@ class Operation(models.Model):
     
     class Meta:
         db_table = 'Operation'
-
-
+        
 class ResumeIndicador(models.Model):
     par = models.ForeignKey(Pares, blank=True, null=True, on_delete=models.CASCADE)
     date = models.DateTimeField(db_column='Date', blank=True, null=True)
@@ -100,4 +98,43 @@ class UserFavAccount(models.Model):
     group = models.IntegerField(db_column='Group', blank=True, null=True)
     class Meta:
         db_table = 'UserFavAccount'
-        
+
+
+class Events(models.Model): 
+    orden = models.BigIntegerField(primary_key=True)
+    hora = models.TimeField(db_column='hora', blank=True, null=True)
+    fecha = models.DateField(db_column='fecha', blank=True, null=True)
+    fecha_num = models.BigIntegerField(db_column='fecha_num', blank=True, null=True)
+    tiempo_falta = models.CharField(db_column='tiempo_falta', max_length=40)
+    moneda = models.CharField(db_column='moneda', max_length=40)
+    evento = models.CharField(db_column='evento', max_length=40)
+    periodo = models.CharField(db_column='periodo', max_length=40)
+    periodo2 = models.CharField(db_column='periodo2', max_length=40)
+    impacto = models.CharField(db_column='impacto', max_length=40)
+    precedente = models.CharField(db_column='precedente', max_length=40)
+    consenso = models.CharField(db_column='consenso', max_length=40)
+    actual = models.CharField(db_column='actual', max_length=40)
+    
+    class Meta: 
+        db_table = 'events'
+
+class ParMoneda(models.Model):
+    id = models.BigIntegerField(primary_key=True)
+    par = models.CharField(db_column='par', max_length=40)
+    moneda = models.CharField(db_column='moneda', max_length=40)
+    
+    class Meta: 
+        db_table = 'par_moneda'
+
+class Pips(models.Model): 
+    orden = models.BigIntegerField(primary_key=True)
+    fecha = models.DateField(db_column='fecha', blank=True, null=True)
+    fecha_numero = models.BigIntegerField(db_column='fecha_numero', blank=True, null=True)
+    simbolo = models.CharField(db_column='simbolo', max_length=40)
+    price_open = models.FloatField(db_column='price_open', blank=True, null=True)
+    price_close = models.FloatField(db_column='price_close', blank=True, null=True)
+    diferencia = models.FloatField(db_column='diferencia', blank=True, null=True)
+    pips = models.FloatField(db_column='pips', blank=True, null=True)
+    
+    class Meta: 
+        db_table = 'pips'

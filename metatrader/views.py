@@ -67,7 +67,7 @@ class AccountTypeApiView(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else: 
             return Response({'Error':'Dato no valido'}, status=status.HTTP_400_BAD_REQUEST)
-        
+
 class AccountApiView(viewsets.ModelViewSet):
     serializer_class = AccountSerializer
     queryset = Account.objects.using('postgres').all()
@@ -355,4 +355,36 @@ class UserFavAccountsApiView(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response({'Error':'Dato no valido'}, status=status.HTTP_400_BAD_REQUEST)
-        
+
+class EventsApiView(viewsets.ModelViewSet):
+    serializer_class = EventsSerializer
+    queryset = Events.objects.using('postgres').all()
+    def create(self, request, *args, **kwargs):
+        serializer = EventsSerializer(data=request.data)
+        if(serializer.is_valid()):
+            Events.objects.using('postgres').create(**serializer.validated_data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else: 
+            return Response({'Error':'Dato no valido'}, status=status.HTTP_400_BAD_REQUEST)
+
+class ParMonedaApiView(viewsets.ModelViewSet): 
+    serializer_class = ParMonedaSerializer
+    queryset = ParMoneda.objects.using('postgres').all()
+    def create(self, request, *args, **kwargs):
+        serializer = ParMonedaSerializer(data=request.data)
+        if(serializer.is_valid()):
+            ParMoneda.objects.using('postgres').create(**serializer.validated_data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else: 
+            return Response({'Error':'Dato no valido'}, status=status.HTTP_400_BAD_REQUEST)
+
+class PipsApiView(viewsets.ModelViewSet): 
+    serializer_class = PipsSerializer
+    queryset = Pips.objects.using('postgres').all()
+    def create(self, request, *args, **kwargs):
+        serializer = PipsSerializer(data=request.data)
+        if(serializer.is_valid()):
+            Pips.objects.using('postgres').create(**serializer.validated_data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else: 
+            return Response({'Error':'Dato no valido'}, status=status.HTTP_400_BAD_REQUEST)

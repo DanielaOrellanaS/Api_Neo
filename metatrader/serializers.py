@@ -19,7 +19,7 @@ class AccountTypeSerializer(serializers.ModelSerializer):
     #description = serializers.CharField(queryset=AccountType.objects.using('postgres').all())
     class Meta:
         model = AccountType
-        fields = ['description']
+        fields = ['description'] 
 
 class AccountSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
@@ -51,3 +51,21 @@ class UserFavAccountsSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserFavAccount
         fields = ['account', 'user', 'group']
+
+class EventsSerializer(serializers.ModelSerializer):
+    orden = serializers.IntegerField()
+    class Meta: 
+        model = Events
+        fields = '__all__'
+
+class ParMonedaSerializer(serializers.ModelSerializer): 
+    id = serializers.IntegerField()
+    class Meta: 
+        model = ParMoneda
+        fields = '__all__'
+
+class PipsSerializer(serializers.ModelSerializer): 
+    orden = serializers.IntegerField()
+    class Meta: 
+        model = Pips
+        fields = '__all__'
