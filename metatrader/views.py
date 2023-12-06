@@ -25,18 +25,6 @@ class ParesApiView(viewsets.ModelViewSet):
         else:
             return Response({'Error':'Dato no valido'}, status=status.HTTP_400_BAD_REQUEST)
 
-    def list(self, request, *args, **kwargs):
-        id = self.request.query_params.get('id', None)
-        if id is not None:
-            par_name = (
-                Pares.objects.using('postgres')
-                .filter(id=id)
-                .values('id', 'pares')
-            )
-            return Response(par_name, status=status.HTTP_200_OK)
-        else:
-            return Response({'Error': 'No se proporcionó el parámetro account_id'}, status=status.HTTP_400_BAD_REQUEST)
-        
 class MonedaApiView(viewsets.ModelViewSet):
     serializer_class = MonedaSerializer
     queryset = Datatrader1M.objects.using('postgres').all()
@@ -164,15 +152,15 @@ class DetailBalanceDayApiView(viewsets.ModelViewSet):
                 .values('balance') \
                 .first()
 
-            result = {
-                'current_balance': current_balance.balance if current_balance else None,
-                'previous_closing_balance': previous_closing_balance['balance'] if previous_closing_balance else None
-            }
-
-            return Response(result, status=status.HTTP_200_OK)
+            if current_balance and previous_closing_balance:
+                # Calcula la diferencia entre el balance actual y el del día anterior
+                difference = current_balance.balance - previous_closing_balance['balance']
+                return Response({'difference': difference}, status=status.HTTP_200_OK)
+            else:
+                return Response({'Error': 'No se encontraron balances'}, status=status.HTTP_404_NOT_FOUND)
         
         return Response({'Error': 'No se proporcionó el parámetro account_id'}, status=status.HTTP_400_BAD_REQUEST)
-
+    
 ### OPERATIONS ###
 
 #@csrf_exempt
