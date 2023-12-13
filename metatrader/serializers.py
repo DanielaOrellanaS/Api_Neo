@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from rest_framework.fields import empty
 from metatrader.models import *
-from authuser.serializers import UserProfileSerializer
 
 class ParesSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
@@ -47,11 +46,12 @@ class IndicadorSerializer(serializers.ModelSerializer):
         fields = '__all__'
         
 class UserFavAccountsSerializer(serializers.ModelSerializer):
-    account = serializers.PrimaryKeyRelatedField(queryset=Account.objects.using('postgres').all()) 
+    id = serializers.IntegerField()
+    
     class Meta:
-        model = UserFavAccount
-        fields = ['account', 'user', 'group']
-
+        model = UserFavAccounts
+        fields = '__all__'
+        
 class EventsSerializer(serializers.ModelSerializer):
     orden = serializers.IntegerField()
     class Meta: 

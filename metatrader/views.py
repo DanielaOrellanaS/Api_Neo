@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from django.db.models import Count, Max, Min, F, Subquery
+from rest_framework import generics
 from datetime import datetime, timedelta
 from rest_framework import status, viewsets
 from metatrader.models import *
@@ -414,19 +415,34 @@ class LastIndicatorApiView(viewsets.ModelViewSet):
 
         return indicators_data
 
-class UserFavAccountsApiView(viewsets.ModelViewSet):
+class UserFavAccountsApiView(viewsets.ModelViewSet): 
     serializer_class = UserFavAccountsSerializer
-    queryset = UserFavAccount.objects.using('postgres').all()
-
+    queryset = UserFavAccounts.objects.using('postgres').all()
     def create(self, request, *args, **kwargs):
         serializer = UserFavAccountsSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            UserFavAccount.objects.using('postgres').create(**serializer.validated_data)
+        if(serializer.is_valid()):
+            UserFavAccounts.objects.using('postgres').create(**serializer.validated_data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
+        else: 
             return Response({'Error':'Dato no valido'}, status=status.HTTP_400_BAD_REQUEST)
+        
+class UserDetailsPerUserApiView(viewsets.ModelViewSet):
+    serializer_class = DetailBalanceSerializer
 
+    def get_queryset(self):
+        user = self.request.query_params.get('user')
+        try:
+            user_accounts = UserFavAccounts.objects.using('postgres').filter(user=user)
+            user_account_ids = []
+            for account in user_accounts:
+                user_account_ids.extend(account.accounts.values_list('id', flat=True))
+
+            account_details = DetailBalance.objects.using('postgres').filter(account_id__in=user_account_ids)
+            return account_details
+
+        except UserFavAccounts.DoesNotExist:
+            return DetailBalance.objects.none()
+        
 class EventsApiView(viewsets.ModelViewSet):
     serializer_class = EventsSerializer
     queryset = Events.objects.using('postgres').all()

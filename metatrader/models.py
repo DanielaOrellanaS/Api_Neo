@@ -92,13 +92,13 @@ class ResumeIndicador(models.Model):
     class Meta:
         db_table = 'IndicadorResumen'
         
-class UserFavAccount(models.Model): 
-    account = models.ForeignKey(Account, on_delete=models.CASCADE, blank=True, null=True)
-    user = models.CharField(max_length=4)   
-    group = models.IntegerField(db_column='Group', blank=True, null=True)
-    class Meta:
-        db_table = 'UserFavAccount'
+class UserFavAccounts(models.Model):
+    id = models.BigIntegerField(primary_key=True)
+    user = models.CharField(max_length=4)
+    accounts = models.CharField(max_length=255)
 
+    class Meta:
+        db_table = 'UserFavAccounts'
 
 class Events(models.Model): 
     orden = models.BigIntegerField(primary_key=True)
