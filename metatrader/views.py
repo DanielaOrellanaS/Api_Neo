@@ -138,10 +138,13 @@ class AllAccountsDetailsApiView(viewsets.ViewSet):
 
     def list(self, request, *args, **kwargs):
         try:
-            accounts_info = Account.objects.using('postgres').values('id', 'accountType', 'alias')
+            accounts_to_retrieve = request.query_params.get('accounts', '')  
+            accounts_to_retrieve = accounts_to_retrieve.split(',')  
+
+            accounts_info = Account.objects.using('postgres').filter(id__in=accounts_to_retrieve).values('id', 'accountType', 'alias')
             
             latest_balances = DetailBalance.objects.using('postgres') \
-                .filter(account_id__in=[acc['id'] for acc in accounts_info]) \
+                .filter(account_id__in=accounts_to_retrieve) \
                 .values('account_id') \
                 .annotate(latest_id=Max('id'))
                 
@@ -418,31 +421,24 @@ class LastIndicatorApiView(viewsets.ModelViewSet):
 class UserFavAccountsApiView(viewsets.ModelViewSet): 
     serializer_class = UserFavAccountsSerializer
     queryset = UserFavAccounts.objects.using('postgres').all()
+
+    def list(self, request, *args, **kwargs):
+        user = request.query_params.get('user', None)
+        if user:
+            user_accounts = UserFavAccounts.objects.using('postgres').filter(user=user)
+            serializer = self.get_serializer(user_accounts, many=True)
+            return Response(serializer.data)
+        else:
+            return Response({'Error':'Usuario no proporcionado'}, status=status.HTTP_400_BAD_REQUEST)
+
     def create(self, request, *args, **kwargs):
         serializer = UserFavAccountsSerializer(data=request.data)
-        if(serializer.is_valid()):
+        if serializer.is_valid():
             UserFavAccounts.objects.using('postgres').create(**serializer.validated_data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else: 
-            return Response({'Error':'Dato no valido'}, status=status.HTTP_400_BAD_REQUEST)
-        
-class UserDetailsPerUserApiView(viewsets.ModelViewSet):
-    serializer_class = DetailBalanceSerializer
+            return Response({'Error':'Dato no válido'}, status=status.HTTP_400_BAD_REQUEST)
 
-    def get_queryset(self):
-        user = self.request.query_params.get('user')
-        try:
-            user_accounts = UserFavAccounts.objects.using('postgres').filter(user=user)
-            user_account_ids = []
-            for account in user_accounts:
-                user_account_ids.extend(account.accounts.values_list('id', flat=True))
-
-            account_details = DetailBalance.objects.using('postgres').filter(account_id__in=user_account_ids)
-            return account_details
-
-        except UserFavAccounts.DoesNotExist:
-            return DetailBalance.objects.none()
-        
 class EventsApiView(viewsets.ModelViewSet):
     serializer_class = EventsSerializer
     queryset = Events.objects.using('postgres').all()
