@@ -44,6 +44,7 @@ class Account(models.Model):
     id = models.BigIntegerField(primary_key=True)
     accountType = models.ForeignKey(AccountType, on_delete=models.CASCADE, blank=True, null=True)
     alias = models.CharField(max_length=40) 
+    group = models.IntegerField(db_column='group', blank=True, null=True)
     
     class Meta:
         db_table = 'Account'

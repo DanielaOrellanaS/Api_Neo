@@ -1,18 +1,14 @@
 from django.shortcuts import render
-from rest_framework.views import APIView
-from django.db.models import Count, Max, Min, F, Subquery
-from rest_framework import generics
+from django.db.models import Count, Max, Subquery
 from datetime import datetime, timedelta
 from rest_framework import status, viewsets
 from metatrader.models import *
 from django.db.models.functions import TruncDate
 from django.utils.dateparse import parse_date
 from metatrader.serializers import *
-import json
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django.urls import reverse
-from rest_framework import generics
 from django.views.decorators.csrf import csrf_exempt
 
 class ParesApiView(viewsets.ModelViewSet):
@@ -141,8 +137,11 @@ class AllAccountsDetailsApiView(viewsets.ViewSet):
             accounts_to_retrieve = request.query_params.get('accounts', '')  
             accounts_to_retrieve = accounts_to_retrieve.split(',')  
 
-            accounts_info = Account.objects.using('postgres').filter(id__in=accounts_to_retrieve).values('id', 'accountType', 'alias')
-            
+            accounts_info = Account.objects.using('postgres') \
+                .filter(id__in=accounts_to_retrieve) \
+                .order_by('group') \
+                .values('id', 'accountType', 'alias', 'group')
+
             latest_balances = DetailBalance.objects.using('postgres') \
                 .filter(account_id__in=accounts_to_retrieve) \
                 .values('account_id') \
@@ -160,6 +159,7 @@ class AllAccountsDetailsApiView(viewsets.ViewSet):
                 .values('account_id', 'symbol') \
                 .annotate(open_operations=Count('id'))
 
+            
             # Operaciones abiertas
             open_operations = list(
                 Operation.objects.using('postgres')
@@ -176,6 +176,15 @@ class AllAccountsDetailsApiView(viewsets.ViewSet):
                 .values('account_id', 'symbol', 'type', 'lotes', 'dateOpen', 'dateClose', 'openPrice', 'closePrice', 'profit', 'tp', 'sl')
             )
             
+            for operation in open_operations:
+                operation['dateOpen'] = operation['dateOpen'].strftime('%Y/%m/%d %H:%M')
+                operation['dateClose'] = operation['dateClose'].strftime('%Y/%m/%d %H:%M')
+            
+            for operation in closed_operations:
+                operation['dateOpen'] = operation['dateOpen'].strftime('%Y/%m/%d %H:%M')
+                operation['dateClose'] = operation['dateClose'].strftime('%Y/%m/%d %H:%M')
+
+            
             all_accounts_data = []
             for acc_info in accounts_info:
                 account_id = acc_info['id']
@@ -186,11 +195,13 @@ class AllAccountsDetailsApiView(viewsets.ViewSet):
                         'id': account_id,
                         'alias': acc_info['alias'],
                         'accountType': acc_info['accountType'],
+                        'group_account': acc_info['group'],
                         'balance': latest_detail_balance['balance'],
                         'flotante': latest_detail_balance['flotante'],
                         'equity': latest_detail_balance['equity'],
                         'percentage': round((latest_detail_balance['flotante'] / latest_detail_balance['balance']) * 100, 2) if latest_detail_balance['balance'] != 0 else 0,
                         'gain': self.get_day_gain(account_id),
+                        'colas': self.get_operations_by_symbol(account_id), 
                         'num_operations': latest_detail_balance['operations'],
                         'operations_by_symbol': next((ops['open_operations'] for ops in operations_by_symbol if ops['account_id'] == account_id), []),
                         'open_operations': [ops for ops in open_operations if ops['account_id'] == account_id],
@@ -205,17 +216,6 @@ class AllAccountsDetailsApiView(viewsets.ViewSet):
         except Account.DoesNotExist:
             return Response({'Error': 'No existen cuentas'}, status=status.HTTP_400_BAD_REQUEST)
         
-    def get_equity(self, account_id):
-        try:
-            detail_balance_instance = DetailBalance.objects.using('postgres') \
-                .filter(account_id=account_id) \
-                .latest('id')
-            return {
-                'equity': detail_balance_instance.equity,
-            }
-        except DetailBalance.DoesNotExist:
-            return None
-
     def get_day_gain(self, account_id):
         try:
             current_date = datetime.now().date()
@@ -241,17 +241,6 @@ class AllAccountsDetailsApiView(viewsets.ViewSet):
 
         return None
     
-    def get_operations_count(self, account_id):
-        try:
-            operations_count = DetailBalance.objects.using('postgres') \
-                .filter(account_id=account_id) \
-                .values_list('operations', flat=True) \
-                .latest('id')
-            return operations_count
-                
-        except DetailBalance.DoesNotExist:
-            return None
-        
     def get_operations_by_symbol(self, account_id=None):
         if account_id is None:
             account_ids = Account.objects.using('postgres').values_list('id', flat=True)
@@ -273,32 +262,6 @@ class AllAccountsDetailsApiView(viewsets.ViewSet):
                 .annotate(open_operations=Count('id'))
             )
             return list(operations_for_account)
-
-
-    def get_open_operations(self, account_id):
-        try:
-            latest_operations = (
-                Operation.objects.using('postgres')
-                .filter(account_id=account_id, dateClose='1970-01-01 00:00')
-                .values('symbol', 'type', 'lotes', 'dateOpen', 'dateClose', 'openPrice', 'closePrice', 'profit', 'tp', 'sl')
-            )
-            return latest_operations
-        except Operation.DoesNotExist:
-            return None
-    
-    def get_closed_operations(self, account_id):
-        try:
-            closed_operations = (
-                Operation.objects.using('postgres')
-                .filter(account_id=account_id)
-                .exclude(dateClose='1970-01-01 00:00')
-                .order_by('-dateClose')[:10]
-                .values('symbol', 'type', 'lotes', 'dateOpen', 'dateClose', 'openPrice', 'closePrice', 'profit', 'tp', 'sl')
-            )
-            return closed_operations
-        except Operation.DoesNotExist:
-            return None
-        
 
 #-----------------------------------------------------------------------------------------
 
