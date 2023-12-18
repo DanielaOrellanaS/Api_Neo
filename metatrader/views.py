@@ -366,20 +366,37 @@ class robot_neoApiView(viewsets.ModelViewSet):
 
 class LastIndicatorApiView(viewsets.ModelViewSet):
     serializer_class = IndicadorSerializer
+
     def get_queryset(self):
-        last_indicators = (
+        # Timeframe 5
+        last_indicators_5 = (
             ResumeIndicador.objects.using('postgres')
-            .values('par_id')
+            .filter(time_frame=5)
+            .values('par')
             .annotate(last_id=Max('id'))
             .values('last_id')
         )
 
-        indicators_data = (
+        indicators_data_5 = (
             ResumeIndicador.objects.using('postgres')
-            .filter(id__in=last_indicators)
+            .filter(id__in=last_indicators_5)
         )
 
-        return indicators_data
+        # Timeframe 15
+        last_indicators_15 = (
+            ResumeIndicador.objects.using('postgres')
+            .filter(time_frame=15)
+            .values('par')
+            .annotate(last_id=Max('id'))
+            .values('last_id')
+        )
+
+        indicators_data_15 = (
+            ResumeIndicador.objects.using('postgres')
+            .filter(id__in=last_indicators_15)
+        )
+
+        return indicators_data_5.union(indicators_data_15)
 
 class UserFavAccountsApiView(viewsets.ModelViewSet): 
     serializer_class = UserFavAccountsSerializer
