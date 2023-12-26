@@ -425,21 +425,19 @@ class EventsApiView(viewsets.ModelViewSet):
     
     def get_queryset(self):
         queryset = super().get_queryset()
-        fechas = self.request.query_params.getlist('fecha', None)
-        if fechas:
-            parsed_dates = [parse_date(fecha) for fecha in fechas if parse_date(fecha)]
-            if parsed_dates:
-                queryset = queryset.filter(fecha__in=parsed_dates)
-        return queryset
+        date_param = self.request.query_params.get('fecha', None)
+        
+        if date_param:
+            parsed_date = parse_date(date_param)
+            if parsed_date:
+                queryset = queryset.filter(fecha=parsed_date)
+        
+        if not date_param:
+            return queryset.order_by('-fecha', '-hora')
 
-    def create(self, request, *args, **kwargs):
-        serializer = EventsSerializer(data=request.data)
-        if(serializer.is_valid()):
-            Events.objects.using('postgres').create(**serializer.validated_data)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else: 
-            return Response({'Error':'Dato no valido'}, status=status.HTTP_400_BAD_REQUEST)
-
+        return queryset.order_by('-fecha', '-hora')
+    
+    
 class ParMonedaApiView(viewsets.ModelViewSet): 
     serializer_class = ParMonedaSerializer
     queryset = ParMoneda.objects.using('postgres').all()
