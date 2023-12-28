@@ -459,3 +459,37 @@ class PipsApiView(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else: 
             return Response({'Error':'Dato no valido'}, status=status.HTTP_400_BAD_REQUEST)
+
+class rangos_neoApiView(viewsets.ModelViewSet):
+    serializer_class = RangosSerializer
+    queryset = CortesIndicador.objects.using('postgres').all()
+
+    def create(self, request, *args, **kwargs):
+        try:
+            data = request.data
+            ind = CortesIndicador.objects.using('postgres').create(par_id=data['par'],date=data['date'],
+                                                                   corte_buy=data['corte_buy'],corte_sell=data['corte_sell'],
+                                                                   time_frame=data['time_frame'])
+            return Response('Success!!',status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
+        
+    def list(self, request, *args, **kwargs):
+        try:
+            try:
+                data = eval(list(request.data)[0].replace('\0', ''))
+            except:
+                data = request.data
+           
+            par_buscado = Pares.objects.using('postgres').get(pares=data['par'])
+
+            resultado = list(CortesIndicador.objects.using('postgres').filter(par=par_buscado.pk, time_frame=data['time_frame']).order_by('id').values())
+            if len(resultado)>0:
+                data_ser = resultado[-1]
+                return Response({'Corte_buy_{}'.format(data['par']):data_ser['corte_buy'],
+                                 'Corte_sell_{}'.format(data['par']):data_ser['corte_sell']}, status=status.HTTP_200_OK)
+            else:
+                return Response({'Error':'No existe los rangos buscados'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        except Exception as e:
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)

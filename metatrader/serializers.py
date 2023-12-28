@@ -69,3 +69,9 @@ class PipsSerializer(serializers.ModelSerializer):
     class Meta: 
         model = Pips
         fields = '__all__'
+
+class RangosSerializer(serializers.ModelSerializer):
+    par = serializers.PrimaryKeyRelatedField(queryset=Pares.objects.using('postgres').all())
+    class Meta:
+        model = CortesIndicador
+        fields = '__all__'
