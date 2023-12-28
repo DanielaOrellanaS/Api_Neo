@@ -139,3 +139,13 @@ class Pips(models.Model):
     
     class Meta: 
         db_table = 'pips'
+
+class CortesIndicador(models.Model):
+    par = models.ForeignKey(Pares, blank=True, null=True, on_delete=models.CASCADE)
+    date = models.DateTimeField(db_column='Date',blank=True, null=True)
+    corte_buy = models.FloatField(db_column='corte_buy',blank=True, null=True)
+    corte_sell = models.FloatField(db_column='corte_sell', blank=True, null=True)
+    time_frame = models.IntegerField(db_column='time_frame', blank=True, null=True)
+
+    class Meta:
+        db_table = 'CortesIndicador'

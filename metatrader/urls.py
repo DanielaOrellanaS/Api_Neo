@@ -17,6 +17,7 @@ router.register(r'cuentafavorita', views.UserFavAccountsApiView, basename='cuent
 router.register(r'eventos', views.EventsApiView, basename='eventos')
 router.register(r'par_moneda', views.ParMonedaApiView, basename='par_moneda')
 router.register(r'pips', views.PipsApiView, basename='pips')
+router.register(r'rangos_indicador', views.rangos_neoApiView, basename='neobot')
 
 urlpatterns = [
     path('', include(router.urls)), 
