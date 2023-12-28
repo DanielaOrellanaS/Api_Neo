@@ -201,6 +201,7 @@ class AllAccountsDetailsApiView(viewsets.ViewSet):
                         'equity': latest_detail_balance['equity'],
                         'percentage': round((latest_detail_balance['flotante'] / latest_detail_balance['balance']) * 100, 2) if latest_detail_balance['balance'] != 0 else 0,
                         'gain': self.get_day_gain(account_id),
+                        'percentage_gain': self.get_percentage_gain(account_id),
                         'colas': self.get_operations_by_symbol(account_id), 
                         'num_operations': latest_detail_balance['operations'],
                         'operations_by_symbol': next((ops['open_operations'] for ops in operations_by_symbol if ops['account_id'] == account_id), []),
@@ -240,6 +241,31 @@ class AllAccountsDetailsApiView(viewsets.ViewSet):
             pass
 
         return None
+    
+    def get_percentage_gain(self, account_id):
+        try:
+            current_detail_balance = DetailBalance.objects.using('postgres') \
+                .filter(account_id=account_id) \
+                .order_by('date', 'time') \
+                .first()
+
+            first_balance_of_the_day = DetailBalance.objects.using('postgres') \
+                .filter(account_id=account_id, date=current_detail_balance.date) \
+                .order_by('time') \
+                .values('balance') \
+                .first()
+
+            if current_detail_balance and first_balance_of_the_day:
+                current_balance = current_detail_balance.balance
+                first_balance = first_balance_of_the_day['balance']
+
+                percentage_gain = ((current_balance - first_balance) / first_balance) * 100
+                return round(percentage_gain, 2)
+
+        except DetailBalance.DoesNotExist:
+            pass
+
+        return 0 
     
     def get_operations_by_symbol(self, account_id=None):
         if account_id is None:
