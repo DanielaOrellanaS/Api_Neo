@@ -390,7 +390,7 @@ class robot_neoApiView(viewsets.ModelViewSet):
                 if fecha>=fecha2_server-datetime.timedelta(hours=1):
                     return Response({'PC1_{}'.format(data['par']):data_ser['pc1']}, status=status.HTTP_200_OK)
                 else:
-                    return Response({'Datos no actualizados de par {}, se devuelve indicador neutro: '.format(data['par']):data_ser['pc1']}, status=status.HTTP_200_OK)
+                    return Response({'Datos no actualizados de par {}, se devuelve indicador neutro: '.format(data['par']):0}, status=status.HTTP_200_OK)
             else:
                 return Response({'Error':'No existe el dato buscado'}, status=status.HTTP_400_BAD_REQUEST)
             
