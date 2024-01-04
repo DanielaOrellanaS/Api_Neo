@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
+import datetime
 
 class ParesApiView(viewsets.ModelViewSet):
     serializer_class = ParesSerializer
@@ -382,7 +383,14 @@ class robot_neoApiView(viewsets.ModelViewSet):
             resultado = list(ResumeIndicador.objects.using('postgres').filter(par=par_buscado.pk, time_frame=data['time_frame']).order_by('id').values())
             if len(resultado)>0:
                 data_ser = resultado[-1]
-                return Response({'PC1_{}'.format(data['par']):data_ser['pc1']}, status=status.HTTP_200_OK)
+                fecha = data_ser['date']
+                fecha_server = datetime.datetime.now()+datetime.timedelta(hours=7)
+                fecha2_server = datetime.datetime.fromisoformat(str(fecha_server)).replace(tzinfo=datetime.timezone.utc)
+                
+                if fecha>=fecha2_server-datetime.timedelta(hours=1):
+                    return Response({'PC1_{}'.format(data['par']):data_ser['pc1']}, status=status.HTTP_200_OK)
+                else:
+                    return Response({'Datos no actualizados de par {}, se devuelve indicador neutro: '.format(data['par']):data_ser['pc1']}, status=status.HTTP_200_OK)
             else:
                 return Response({'Error':'No existe el dato buscado'}, status=status.HTTP_400_BAD_REQUEST)
             
