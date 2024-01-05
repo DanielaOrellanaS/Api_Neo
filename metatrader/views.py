@@ -384,7 +384,7 @@ class robot_neoApiView(viewsets.ModelViewSet):
             if len(resultado)>0:
                 data_ser = resultado[-1]
                 fecha = data_ser['date']
-                fecha_server = datetime.datetime.now()+datetime.timedelta(hours=7)
+                fecha_server = datetime.datetime.now()+datetime.timedelta(hours=2)
                 fecha2_server = datetime.datetime.fromisoformat(str(fecha_server)).replace(tzinfo=datetime.timezone.utc)
                 
                 if fecha>=fecha2_server-datetime.timedelta(hours=1):
