@@ -3,13 +3,14 @@ from django.db.models import Count, Max, Subquery
 from datetime import datetime, timedelta
 from rest_framework import status, viewsets
 from metatrader.models import *
-from django.db.models.functions import TruncDate
+from django.utils import timezone
 from django.utils.dateparse import parse_date
 from metatrader.serializers import *
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import get_object_or_404
 
 class ParesApiView(viewsets.ModelViewSet):
     serializer_class = ParesSerializer
@@ -126,97 +127,102 @@ class DetailBalanceAccountApiView(viewsets.ModelViewSet):
         except Exception as e:
             return Response({'Exception Message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+
+
+### DETAILS ACCOUNTS ###
+
 #-----------------------------------------------------------------------------------------
 
-class AllAccountsDetailsApiView(viewsets.ViewSet):
+class ResumeDetailBalanceApiView(viewsets.ModelViewSet):
     serializer_class = DetailBalanceSerializer
     queryset = DetailBalance.objects.using('postgres').all()
 
-    def list(self, request, *args, **kwargs):
-        try:
-            accounts_to_retrieve = request.query_params.get('accounts', '')  
-            accounts_to_retrieve = accounts_to_retrieve.split(',')  
-
-            accounts_info = Account.objects.using('postgres') \
-                .filter(id__in=accounts_to_retrieve) \
-                .order_by('group') \
-                .values('id', 'accountType', 'alias', 'group')
-
-            latest_balances = DetailBalance.objects.using('postgres') \
-                .filter(account_id__in=accounts_to_retrieve) \
-                .values('account_id') \
-                .annotate(latest_id=Max('id'))
-                
-            additional_info = DetailBalance.objects.using('postgres') \
-                .filter(id__in=Subquery(latest_balances.values('latest_id'))) \
-                .values('id', 'account_id', 'balance', 'flotante', 'equity', 'operations')
-
-            account_data_dict = {info['account_id']: info for info in additional_info}
-
-            operations_by_symbol = Operation.objects.using('postgres') \
-                .filter(account_id__in=[acc['id'] for acc in accounts_info]) \
-                .exclude(dateClose='1970-01-01 00:00') \
-                .values('account_id', 'symbol') \
-                .annotate(open_operations=Count('id'))
-
+    def list(self, request):
+        account_ids_param = request.query_params.get('account_id')
+        if account_ids_param:
+            account_ids = [int(id) for id in account_ids_param.split(',')]
+            detail_balances = DetailBalance.objects.using('postgres').filter(account_id__in=account_ids).order_by('account_id', '-date', '-time')
             
-            # Operaciones abiertas
-            open_operations = list(
-                Operation.objects.using('postgres')
-                .filter(account_id__in=[acc['id'] for acc in accounts_info], dateClose='1970-01-01 00:00')
-                .values('account_id', 'symbol', 'type', 'lotes', 'dateOpen', 'dateClose', 'openPrice', 'closePrice', 'profit', 'tp', 'sl')
-            )
-
-            # Operaciones cerradas
-            closed_operations = list(
-                Operation.objects.using('postgres')
-                .filter(account_id__in=[acc['id'] for acc in accounts_info])
-                .exclude(dateClose='1970-01-01 00:00')
-                .order_by('-dateClose')[:10]
-                .values('account_id', 'symbol', 'type', 'lotes', 'dateOpen', 'dateClose', 'openPrice', 'closePrice', 'profit', 'tp', 'sl')
+            accounts_info = (
+                Account.objects.using('postgres')
+                .filter(id__in=account_ids)
+                .order_by('group')
+                .values('id', 'alias', 'accountType', 'group')
             )
             
-            for operation in open_operations:
-                operation['dateOpen'] = operation['dateOpen'].strftime('%Y/%m/%d %H:%M')
-                operation['dateClose'] = operation['dateClose'].strftime('%Y/%m/%d %H:%M')
-            
-            for operation in closed_operations:
-                operation['dateOpen'] = operation['dateOpen'].strftime('%Y/%m/%d %H:%M')
-                operation['dateClose'] = operation['dateClose'].strftime('%Y/%m/%d %H:%M')
+            response_data = []
+            for account_id in account_ids:
+                latest_balance = detail_balances.filter(account_id=account_id).first()
+                if latest_balance:
+                    float_percent = round((latest_balance.flotante / latest_balance.balance) * 100, 4) if latest_balance.balance != 0 else 0
+                    
+                    first_balance = DetailBalance.objects.using('postgres').filter(
+                        account_id=account_id, date=latest_balance.date).order_by('time').first()
 
-            
-            all_accounts_data = []
-            for acc_info in accounts_info:
-                account_id = acc_info['id']
-                latest_detail_balance = account_data_dict.get(account_id)
+                    balance_percent = 0
+                    if first_balance:
+                        balance_percent = round(((latest_balance.balance - first_balance.balance) / first_balance.balance) * 100, 4)
 
-                if latest_detail_balance:
-                    account_data = {
-                        'id': account_id,
-                        'alias': acc_info['alias'],
-                        'accountType': acc_info['accountType'],
-                        'group_account': acc_info['group'],
-                        'balance': latest_detail_balance['balance'],
-                        'flotante': latest_detail_balance['flotante'],
-                        'equity': latest_detail_balance['equity'],
-                        'percentage': round((latest_detail_balance['flotante'] / latest_detail_balance['balance']) * 100, 2) if latest_detail_balance['balance'] != 0 else 0,
-                        'gain': self.get_day_gain(account_id),
-                        'percentage_gain': self.get_percentage_gain(account_id),
-                        'colas': self.get_operations_by_symbol(account_id), 
-                        'num_operations': latest_detail_balance['operations'],
-                        'operations_by_symbol': next((ops['open_operations'] for ops in operations_by_symbol if ops['account_id'] == account_id), []),
-                        'open_operations': [ops for ops in open_operations if ops['account_id'] == account_id],
-                        'closed_operations': [ops for ops in closed_operations if ops['account_id'] == account_id],
+                    balance_formatted = format(latest_balance.balance, ',.4f') if latest_balance.balance is not None else None
+                    flotante_formatted = format(latest_balance.flotante, ',.4f') if latest_balance.flotante is not None else None
+
+                    alias = next((acc['alias'] for acc in accounts_info if acc['id'] == account_id), None)
+                    data = {
+                        'balance': balance_formatted,
+                        'flotante': flotante_formatted,
+                        'percentage': float_percent,
+                        'balance_percent': balance_percent,
+                        'account_id': latest_balance.account_id,
+                        'alias': alias,
                     }
-                    all_accounts_data.append(account_data)
-                else:
-                    all_accounts_data.append({'Error': f'No existen datos para la cuenta {account_id}'})
+                    response_data.append(data)
             
-            return Response(all_accounts_data, status=status.HTTP_200_OK)
-                
-        except Account.DoesNotExist:
-            return Response({'Error': 'No existen cuentas'}, status=status.HTTP_400_BAD_REQUEST)
+            sorted_response_data = sorted(response_data, key=lambda x: x.get('alias', '').lower())
+            return Response(sorted_response_data, status=status.HTTP_200_OK)
+        else:
+            return Response({'Error': 'No se proporcionaron parámetros account_id'}, status=status.HTTP_400_BAD_REQUEST)
         
+class AllDetailBalanceApiView(viewsets.ModelViewSet):
+    serializer_class = OperationSerializer
+
+    def list(self, request, *args, **kwargs):
+        account_id = request.query_params.get('account_id')
+        if account_id is not None:
+            open_operations = Operation.objects.using('postgres').filter(account_id=account_id, dateClose='1970-01-01T00:00:00Z').order_by('-dateOpen')[:10]
+            closed_operations = Operation.objects.using('postgres').filter(account_id=account_id).exclude(dateClose='1970-01-01T00:00:00Z').order_by('-dateClose')[:10]
+
+            open_serializer = OperationSerializer(open_operations, many=True)
+            closed_serializer = OperationSerializer(closed_operations, many=True)
+
+            latest_detail_balance = DetailBalance.objects.using('postgres').filter(account_id=account_id).order_by('-date', '-time').first()
+            day_gain = self.get_day_gain(account_id)
+
+            response_data = {
+                'balance': format(latest_detail_balance.balance if latest_detail_balance else None, ',.4f'),
+                'flotante': format(latest_detail_balance.flotante if latest_detail_balance else None, ',.4f'),
+                'equity': format(latest_detail_balance.equity if latest_detail_balance else None, ',.4f'),
+                'gain': format(day_gain, ',.4f') if day_gain else None,
+                'num_operations': latest_detail_balance.operations if latest_detail_balance else None,
+                'colas': self.get_operations_by_symbol(account_id), 
+                'open_operations': open_serializer.data,
+                'closed_operations': closed_serializer.data,
+            }
+            
+            self.format_operations(response_data['open_operations'])
+            self.format_operations(response_data['closed_operations'])
+            
+            return Response(response_data, status=status.HTTP_200_OK)
+        else:
+            return Response({'Error': 'No se proporcionó el parámetro account_id'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    def format_operations(self, operations):
+        for operation in operations:
+            operation['dateOpen'] = timezone.datetime.strptime(operation['dateOpen'], "%Y-%m-%dT%H:%M:%SZ").strftime('%Y-%m-%d %H:%M:%S')
+            operation['dateClose'] = timezone.datetime.strptime(operation['dateClose'], "%Y-%m-%dT%H:%M:%SZ").strftime('%Y-%m-%d %H:%M:%S')
+            operation['date'] = timezone.datetime.strptime(operation['date'], "%Y-%m-%dT%H:%M:%SZ").strftime('%Y-%m-%d %H:%M:%S')
+            for key in ['lotes', 'openPrice', 'closePrice', 'sl', 'tp', 'profit']:
+                operation[key] = format(operation[key], ',.4f') if isinstance(operation[key], float) else operation[key]
+
     def get_day_gain(self, account_id):
         try:
             current_date = datetime.now().date()
@@ -242,31 +248,6 @@ class AllAccountsDetailsApiView(viewsets.ViewSet):
 
         return None
     
-    def get_percentage_gain(self, account_id):
-        try:
-            current_detail_balance = DetailBalance.objects.using('postgres') \
-                .filter(account_id=account_id) \
-                .order_by('date', 'time') \
-                .first()
-
-            first_balance_of_the_day = DetailBalance.objects.using('postgres') \
-                .filter(account_id=account_id, date=current_detail_balance.date) \
-                .order_by('time') \
-                .values('balance') \
-                .first()
-
-            if current_detail_balance and first_balance_of_the_day:
-                current_balance = current_detail_balance.balance
-                first_balance = first_balance_of_the_day['balance']
-
-                percentage_gain = ((current_balance - first_balance) / first_balance) * 100
-                return round(percentage_gain, 2)
-
-        except DetailBalance.DoesNotExist:
-            pass
-
-        return 0 
-    
     def get_operations_by_symbol(self, account_id=None):
         if account_id is None:
             account_ids = Account.objects.using('postgres').values_list('id', flat=True)
@@ -288,7 +269,8 @@ class AllAccountsDetailsApiView(viewsets.ViewSet):
                 .annotate(open_operations=Count('id'))
             )
             return list(operations_for_account)
-
+        
+        
 #-----------------------------------------------------------------------------------------
 
 ### OPERATIONS ###
