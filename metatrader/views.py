@@ -208,6 +208,14 @@ class AllDetailBalanceApiView(viewsets.ModelViewSet):
                 'closed_operations': closed_serializer.data,
             }
             
+            balance_value = latest_detail_balance.balance if latest_detail_balance else 0
+            flotante_value = latest_detail_balance.flotante if latest_detail_balance else 0
+            if flotante_value != 0:
+                percentage = (balance_value / flotante_value) * 100
+                response_data['percentage'] = round(percentage, 2)
+            else:
+                response_data['percentage'] = None
+            
             self.format_operations(response_data['open_operations'])
             self.format_operations(response_data['closed_operations'])
             
