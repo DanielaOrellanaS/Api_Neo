@@ -234,28 +234,34 @@ class AllDetailBalanceApiView(viewsets.ModelViewSet):
     def get_day_gain(self, account_id):
         try:
             current_date = datetime.now().date()
-            
-            current_balance = DetailBalance.objects.using('postgres') \
-                .filter(account_id=account_id, date__lte=current_date) \
-                .order_by('-date', '-time') \
-                .first()
-
             previous_date = current_date - timedelta(days=1)
-            previous_closing_balance = DetailBalance.objects.using('postgres') \
-                .filter(account_id=account_id, date=previous_date) \
-                .order_by('-date', '-time') \
-                .values('balance') \
-                .first()
 
-            if current_balance and previous_closing_balance:
-                difference = current_balance.balance - previous_closing_balance['balance']
-                return difference
-                
+            max_previous_date = DetailBalance.objects.using('postgres') \
+                .filter(date__lt=current_date) \
+                .filter(account_id=account_id) \
+                .aggregate(Max('date'))
+
+            if max_previous_date['date__max']:
+                previous_closing_balance = DetailBalance.objects.using('postgres') \
+                    .filter(date=max_previous_date['date__max']) \
+                    .filter(account_id=account_id) \
+                    .order_by('-time') \
+                    .first()
+
+                if previous_closing_balance:
+                    balance = previous_closing_balance.balance
+                    if isinstance(balance, float):
+                        return balance
+                    elif isinstance(balance, str):
+                        # Si es una cadena, intentamos convertirla a un número flotante
+                        balance_amount = float(balance.replace(',', ''))
+                        return balance_amount
+
         except DetailBalance.DoesNotExist:
             pass
 
         return None
-    
+
     def get_operations_by_symbol(self, account_id=None):
         if account_id is None:
             account_ids = Account.objects.using('postgres').values_list('id', flat=True)
