@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.db.models import Count, Max, Subquery
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from rest_framework import status, viewsets
 from metatrader.models import *
 from django.utils import timezone
@@ -373,14 +373,14 @@ class robot_neoApiView(viewsets.ModelViewSet):
             if len(resultado)>0:
                 data_ser = resultado[-1]
                 fecha = data_ser['date']
-                fecha_server = datetime.datetime.now()+datetime.timedelta(hours=2)
-                fecha2_server = datetime.datetime.fromisoformat(str(fecha_server)).replace(tzinfo=datetime.timezone.utc)
+                fecha_server = datetime.now()+timedelta(hours=2)
+                fecha2_server = datetime.fromisoformat(str(fecha_server)).replace(tzinfo=timezone.utc)
                 
-                if fecha>=fecha2_server-datetime.timedelta(hours=1):
+                if fecha>=fecha2_server-timedelta(hours=1):
                     return Response({'PC1_{}'.format(data['par']):data_ser['pc1']}, status=status.HTTP_200_OK)
                 else:
                     return Response({'Datos no actualizados de par {}, se devuelve indicador neutro: '.format(data['par']):0,
-                                     'Hora api':str(datetime.datetime.now())}, status=status.HTTP_200_OK)
+                                     'Hora api':str(datetime.now())}, status=status.HTTP_200_OK)
             else:
                 return Response({'Error':'No existe el dato buscado'}, status=status.HTTP_400_BAD_REQUEST)
             
