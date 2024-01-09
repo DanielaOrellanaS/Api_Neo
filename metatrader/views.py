@@ -141,8 +141,8 @@ class ResumeDetailBalanceApiView(viewsets.ModelViewSet):
         account_ids_param = request.query_params.get('account_id')
         if account_ids_param:
             account_ids = [int(id) for id in account_ids_param.split(',')]
+            #DESC
             detail_balances = DetailBalance.objects.using('postgres').filter(account_id__in=account_ids).order_by('account_id', '-date', '-time')
-            
             accounts_info = (
                 Account.objects.using('postgres')
                 .filter(id__in=account_ids)
@@ -152,31 +152,46 @@ class ResumeDetailBalanceApiView(viewsets.ModelViewSet):
             
             response_data = []
             for account_id in account_ids:
+                #Fecha metatrader 
+                current_date = datetime.now()+timedelta(hours=2)
+                #Balance actual (Ultimo balance)
                 latest_balance = detail_balances.filter(account_id=account_id).first()
-                if latest_balance:
-                    float_percent = round((latest_balance.flotante / latest_balance.balance) * 100, 4) if latest_balance.balance != 0 else 0
-                    
-                    first_balance = DetailBalance.objects.using('postgres').filter(
-                        account_id=account_id, date=latest_balance.date).order_by('time').first()
+                alias = next((acc['alias'] for acc in accounts_info if acc['id'] == account_id), None)
+                balance_formatted = format(latest_balance.balance, ',.4f') if latest_balance.balance is not None else None
+                flotante_formatted = format(latest_balance.flotante, ',.4f') if latest_balance.flotante is not None else None
+                float_percent = round((latest_balance.flotante / latest_balance.balance) * 100, 4) if latest_balance.balance != 0 else 0
+                        
+                if latest_balance.date == current_date.date():
+                    if latest_balance:
+                        #Balance inicial 
+                        first_balance = DetailBalance.objects.using('postgres').filter(
+                            account_id=account_id, date=latest_balance.date).order_by('time')
 
-                    balance_percent = 0
-                    if first_balance:
-                        balance_percent = round(((latest_balance.balance - first_balance.balance) / first_balance.balance) * 100, 4)
+                        if first_balance.exists():
+                            balance_percent = round(((latest_balance.balance - first_balance[0].balance) / first_balance[0].balance) * 100, 4)
+                        else: 
+                            balance_percent = 0 
 
-                    balance_formatted = format(latest_balance.balance, ',.4f') if latest_balance.balance is not None else None
-                    flotante_formatted = format(latest_balance.flotante, ',.4f') if latest_balance.flotante is not None else None
+                        data = {
+                            'balance': balance_formatted,
+                            'flotante': flotante_formatted,
+                            'percentage': float_percent,
+                            'balance_percent': balance_percent,
+                            'account_id': account_id,
+                            'alias': alias,
+                        }
 
-                    alias = next((acc['alias'] for acc in accounts_info if acc['id'] == account_id), None)
+                else: 
                     data = {
-                        'balance': balance_formatted,
-                        'flotante': flotante_formatted,
-                        'percentage': float_percent,
-                        'balance_percent': balance_percent,
-                        'account_id': latest_balance.account_id,
-                        'alias': alias,
-                    }
-                    response_data.append(data)
-            
+                            'balance': balance_formatted,
+                            'flotante': flotante_formatted,
+                            'percentage': float_percent,
+                            'balance_percent': 0,
+                            'account_id': account_id,
+                            'alias': alias,
+                        }
+                response_data.append(data)
+                
             sorted_response_data = sorted(response_data, key=lambda x: x.get('alias', '').lower())
             return Response(sorted_response_data, status=status.HTTP_200_OK)
         else:
@@ -201,7 +216,7 @@ class AllDetailBalanceApiView(viewsets.ModelViewSet):
                 'balance': format(latest_detail_balance.balance if latest_detail_balance else None, ',.4f'),
                 'flotante': format(latest_detail_balance.flotante if latest_detail_balance else None, ',.4f'),
                 'equity': format(latest_detail_balance.equity if latest_detail_balance else None, ',.4f'),
-                'gain': format(day_gain, ',.4f') if day_gain else None,
+                'gain': format(day_gain, ',.2f'),
                 'num_operations': latest_detail_balance.operations if latest_detail_balance else None,
                 'colas': self.get_operations_by_symbol(account_id), 
                 'open_operations': open_serializer.data,
@@ -232,36 +247,22 @@ class AllDetailBalanceApiView(viewsets.ModelViewSet):
                 operation[key] = format(operation[key], ',.4f') if isinstance(operation[key], float) else operation[key]
 
     def get_day_gain(self, account_id):
-        try:
-            current_date = datetime.now().date()
-            previous_date = current_date - timedelta(days=1)
-
-            max_previous_date = DetailBalance.objects.using('postgres') \
-                .filter(date__lt=current_date) \
-                .filter(account_id=account_id) \
-                .aggregate(Max('date'))
-
-            if max_previous_date['date__max']:
-                previous_closing_balance = DetailBalance.objects.using('postgres') \
-                    .filter(date=max_previous_date['date__max']) \
-                    .filter(account_id=account_id) \
-                    .order_by('-time') \
-                    .first()
-
-                if previous_closing_balance:
-                    balance = previous_closing_balance.balance
-                    if isinstance(balance, float):
-                        return balance
-                    elif isinstance(balance, str):
-                        # Si es una cadena, intentamos convertirla a un número flotante
-                        balance_amount = float(balance.replace(',', ''))
-                        return balance_amount
-
-        except DetailBalance.DoesNotExist:
-            pass
-
-        return None
-
+        #DESC
+        detail_balances = DetailBalance.objects.using('postgres').filter(account_id=account_id).order_by('-date', '-time')
+        #Balance actual
+        latest_balance = detail_balances
+        #Balance inicial 
+        first_balance = DetailBalance.objects.using('postgres').filter(
+            account_id=account_id, date=latest_balance[0].date).order_by('time')
+        
+        current_date = datetime.now()+timedelta(hours=2)  
+        if latest_balance.exists() and first_balance.exists():
+            if latest_balance[0].date == current_date.date(): 
+                gain = latest_balance[0].balance - first_balance[0].balance
+            else: 
+                gain = 0
+        return gain 
+        
     def get_operations_by_symbol(self, account_id=None):
         if account_id is None:
             account_ids = Account.objects.using('postgres').values_list('id', flat=True)
