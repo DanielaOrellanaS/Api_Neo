@@ -75,3 +75,9 @@ class RangosSerializer(serializers.ModelSerializer):
     class Meta:
         model = CortesIndicador
         fields = '__all__'
+
+class AlertEventsSerializer(serializers.ModelSerializer):
+    par = serializers.PrimaryKeyRelatedField(queryset=Pares.objects.using('postgres').all())
+    class Meta:
+        model = AlertEvents
+        fields = '__all__' 

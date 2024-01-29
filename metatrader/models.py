@@ -149,3 +149,17 @@ class CortesIndicador(models.Model):
 
     class Meta:
         db_table = 'CortesIndicador'
+        
+class AlertEvents(models.Model): 
+    par = models.ForeignKey(Pares, blank=True, null=True, on_delete=models.CASCADE)
+    currency = models.CharField(db_column='currency', max_length=40)
+    name = models.CharField(db_column='name', max_length=40)
+    fecha = models.DateField(db_column='fecha', blank=True, null=True)
+    pips_ant = models.FloatField(db_column='pips_ant', blank=True, null=True)
+    count_events = models.BigIntegerField(db_column='count_events', blank=True, null=True)
+    max_pips = models.FloatField(db_column='max_pips', blank=True, null=True)
+    prom_pips = models.FloatField(db_column='prom_pips', blank=True, null=True)
+    ult_event = models.DateField(db_column='ult_event', blank=True, null=True)
+    
+    class Meta:
+        db_table = 'alert_events'

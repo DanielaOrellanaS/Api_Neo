@@ -19,6 +19,7 @@ router.register(r'pips', views.PipsApiView, basename='pips')
 router.register(r'rangos_indicador', views.rangos_neoApiView, basename='neobot')
 router.register(r'resumetable', views.ResumeDetailBalanceApiView, basename='resumetable')
 router.register(r'alldetailbalance', views.AllDetailBalanceApiView, basename='alldetailbalance')
+router.register(r'alertaeventos', views.AlertEventsApiView, basename='alertaeventos')
 
 urlpatterns = [
     path('', include(router.urls)), 

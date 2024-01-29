@@ -524,3 +524,38 @@ class rangos_neoApiView(viewsets.ModelViewSet):
             
         except Exception as e:
             return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
+        
+class AlertEventsApiView(viewsets.ModelViewSet):
+    serializer_class = AlertEventsSerializer
+    queryset = AlertEvents.objects.using('postgres').all()
+
+    def list(self, request, *args, **kwargs):
+        try:
+            par_name = request.GET.get('par', None)
+            fecha_inicio_str = request.GET.get('fecha_inicio', None)
+            fecha_fin_str = request.GET.get('fecha_fin', None)
+
+            if not all([par_name, fecha_inicio_str, fecha_fin_str]):
+                return Response({'error': 'Parámetros incompletos'}, status=status.HTTP_400_BAD_REQUEST)
+
+            fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d')
+            fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%d') + timedelta(days=1) - timedelta(seconds=1)
+
+            queryset = AlertEvents.objects.using('postgres').filter(
+                par__pares=par_name, 
+                fecha__range=(fecha_inicio, fecha_fin)
+            ).order_by('-fecha')
+
+            if not queryset.exists():
+                return Response({'error': 'No hay datos para la consulta'}, status=status.HTTP_404_NOT_FOUND)
+
+            serializer = self.get_serializer(queryset, many=True)
+
+            response_data = {
+                'alerts': serializer.data,
+            }
+
+            return Response(response_data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
