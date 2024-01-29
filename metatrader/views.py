@@ -536,6 +536,12 @@ class AlertEventsApiView(viewsets.ModelViewSet):
             fecha_fin_str = request.GET.get('fecha_fin', None)
 
             if not all([par_name, fecha_inicio_str, fecha_fin_str]):
+                data = request.data
+                par_name = data.get('par', None) or par_name
+                fecha_inicio_str = data.get('fecha_inicio', None) or fecha_inicio_str
+                fecha_fin_str = data.get('fecha_fin', None) or fecha_fin_str
+
+            if not all([par_name, fecha_inicio_str, fecha_fin_str]):
                 return Response({'error': 'Parámetros incompletos'}, status=status.HTTP_400_BAD_REQUEST)
 
             fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d')
