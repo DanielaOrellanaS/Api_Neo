@@ -152,6 +152,7 @@ class CortesIndicador(models.Model):
         
 class AlertEvents(models.Model): 
     par = models.ForeignKey(Pares, blank=True, null=True, on_delete=models.CASCADE)
+    par_name = models.CharField(db_column='par', max_length=25, blank=True, null=True)
     currency = models.CharField(db_column='currency', max_length=40)
     name = models.CharField(db_column='name', max_length=40)
     fecha = models.DateField(db_column='fecha', blank=True, null=True)

@@ -534,7 +534,7 @@ class AlertEventsApiView(viewsets.ModelViewSet):
             par_name = request.GET.get('par', None)
             fecha_inicio_str = request.GET.get('fecha_inicio', None)
             fecha_fin_str = request.GET.get('fecha_fin', None)
-
+            print("Datos: ", par_name, fecha_inicio_str, fecha_fin_str)
             if not all([par_name, fecha_inicio_str, fecha_fin_str]):
                 data = request.data
                 par_name = data.get('par', None) or par_name
@@ -546,12 +546,11 @@ class AlertEventsApiView(viewsets.ModelViewSet):
 
             fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d')
             fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%d') + timedelta(days=1) - timedelta(seconds=1)
-
             queryset = AlertEvents.objects.using('postgres').filter(
-                par__pares=par_name, 
+                par_name=par_name, 
                 fecha__range=(fecha_inicio, fecha_fin)
             ).order_by('-fecha')
-
+            
             if not queryset.exists():
                 return Response({'error': 'No hay datos para la consulta'}, status=status.HTTP_404_NOT_FOUND)
 
