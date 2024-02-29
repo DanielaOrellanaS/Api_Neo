@@ -564,3 +564,26 @@ class AlertEventsApiView(viewsets.ModelViewSet):
 
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class DeviceTokenApiView(viewsets.ModelViewSet):
+    serializer_class = DeviceTokenSerializer
+    queryset = DeviceToken.objects.using('postgres').all()
+
+    def list(self, request, *args, **kwargs):
+        user = request.query_params.get('user', None)
+        if user:
+            user_token = DeviceToken.objects.using('postgres').filter(user=user)
+            serializer = self.get_serializer(user_token, many=True)
+            return Response(serializer.data)
+        else:
+            all_tokens = self.queryset
+            serializer = self.get_serializer(all_tokens, many=True)
+            return Response(serializer.data)
+
+    def create(self, request, *args, **kwargs):
+        serializer = DeviceTokenSerializer(data=request.data)
+        if serializer.is_valid():
+            DeviceToken.objects.using('postgres').create(**serializer.validated_data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response({'Error': 'Dato no válido'}, status=status.HTTP_400_BAD_REQUEST)

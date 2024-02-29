@@ -81,3 +81,8 @@ class AlertEventsSerializer(serializers.ModelSerializer):
     class Meta:
         model = AlertEvents
         fields = '__all__' 
+
+class DeviceTokenSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DeviceToken
+        fields = '__all__'

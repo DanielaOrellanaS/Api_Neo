@@ -95,7 +95,7 @@ class ResumeIndicador(models.Model):
         
 class UserFavAccounts(models.Model):
     id = models.BigIntegerField(primary_key=True)
-    user = models.CharField(max_length=4)
+    user = models.CharField(max_length=255)
     accounts = models.CharField(max_length=255)
 
     class Meta:
@@ -164,3 +164,10 @@ class AlertEvents(models.Model):
     
     class Meta:
         db_table = 'alert_events'
+
+class DeviceToken(models.Model):
+    user = models.CharField(max_length=255)
+    token = models.CharField(max_length=255)
+
+    class Meta:
+        db_table = 'DeviceToken'
