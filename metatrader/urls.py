@@ -25,7 +25,5 @@ router.register(r'token', views.DeviceTokenApiView, basename='token')
 
 urlpatterns = [
     path('', include(router.urls)), 
-    path('notification/', SentNotifications.as_view(), name='notification'),
-    path('customnotification/', SentCustomNotifications.as_view(), name='customnotification'),
     ]
     
