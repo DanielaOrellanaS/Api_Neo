@@ -1,7 +1,7 @@
 from django.urls import path, include
 from metatrader import views
 from rest_framework import routers
-from metatrader.views import SentNotifications, SentCustomNotifications
+#from metatrader.views import SentNotifications, SentCustomNotifications
 
 # routes endpoints
 router = routers.DefaultRouter()
