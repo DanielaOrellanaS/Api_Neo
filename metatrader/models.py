@@ -171,3 +171,4 @@ class DeviceToken(models.Model):
 
     class Meta:
         db_table = 'DeviceToken'
+
