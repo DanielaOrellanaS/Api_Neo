@@ -172,6 +172,8 @@ class DeviceToken(models.Model):
     class Meta:
         db_table = 'DeviceToken'
 
+
+
 class variacion_pips_estimacion(models.Model):
     par = models.ForeignKey(Pares, blank=True, null=True, on_delete=models.CASCADE)
     date = models.DateTimeField(db_column='Date', blank=True, null=True)

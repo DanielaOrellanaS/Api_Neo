@@ -11,6 +11,11 @@ from rest_framework.decorators import api_view
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
+import requests
+from rest_framework.views import APIView
+import google.auth
+import google.auth.transport.requests
+from google.oauth2 import service_account
 
 class ParesApiView(viewsets.ModelViewSet):
     serializer_class = ParesSerializer
