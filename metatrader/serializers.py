@@ -86,3 +86,10 @@ class DeviceTokenSerializer(serializers.ModelSerializer):
     class Meta:
         model = DeviceToken
         fields = '__all__'
+
+
+class VariacionPipsSerializer(serializers.ModelSerializer):
+    par = serializers.PrimaryKeyRelatedField(queryset=Pares.objects.using('postgres').all())
+    class Meta:
+        model = variacion_pips_estimacion
+        fields = '__all__'

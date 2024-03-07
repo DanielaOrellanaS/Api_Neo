@@ -171,3 +171,14 @@ class DeviceToken(models.Model):
 
     class Meta:
         db_table = 'DeviceToken'
+
+class variacion_pips_estimacion(models.Model):
+    par = models.ForeignKey(Pares, blank=True, null=True, on_delete=models.CASCADE)
+    date = models.DateTimeField(db_column='Date', blank=True, null=True)
+    variacion = models.FloatField(db_column='variacion',blank=True, null=True)
+    inferior = models.FloatField(db_column='Limite_inferior_pips',blank=True, null=True)
+    superior = models.FloatField(db_column='Limite_superior_pips',blank=True, null=True)
+    time_frame = models.IntegerField(db_column='time_frame', blank=True, null=True)
+
+    class Meta:
+        db_table = 'VariacionPipsModel'

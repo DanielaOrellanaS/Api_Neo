@@ -596,3 +596,50 @@ class DeviceTokenApiView(viewsets.ModelViewSet):
             return Response(serializer.data)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+# Variacion Pips
+class robot_neopipsApiView(viewsets.ModelViewSet):
+    serializer_class = VariacionPipsSerializer
+    queryset = variacion_pips_estimacion.objects.using('postgres').all()
+
+    def create(self, request, *args, **kwargs):
+        try:
+            data = request.data
+            ind = variacion_pips_estimacion.objects.using('postgres').create(par_id=data['par'],
+                                                                             date=data['date'],
+                                                                             variacion=data['variacion'],
+                                                                             inferior=data['limite_inferior'],
+                                                                             superior=data['limite_superior'],
+                                                                             time_frame=data['time_frame'])
+            return Response('Success!!',status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
+        
+    def list(self, request, *args, **kwargs):
+        try:
+            try:
+                data = eval(list(request.data)[0].replace('\0', ''))
+            except:
+                data = request.data
+           
+            par_buscado = Pares.objects.using('postgres').get(pares=data['par'])
+
+            resultado = list(variacion_pips_estimacion.objects.using('postgres').filter(par=par_buscado.pk).order_by('id').values())
+            if len(resultado)>0:
+                data_ser = resultado[-1]
+                fecha = data_ser['date']
+                fecha_server = datetime.now()+timedelta(hours=2)
+                fecha2_server = datetime.fromisoformat(str(fecha_server)).replace(tzinfo=timezone.utc)
+                
+                if fecha>=fecha2_server-timedelta(hours=1):
+                    return Response({'variacion_{}'.format(data['par']):data_ser['variacion'],
+                                     'Limite_inferior_{}'.format(data['par']):data_ser['inferior'],
+                                     'Limite_superior_{}'.format(data['par']):data_ser['superior']}, status=status.HTTP_200_OK)
+                else:
+                    return Response({'Datos no actualizados de par {}, se devuelve variacion neutra: '.format(data['par']):0,
+                                     'Hora api':str(datetime.now())}, status=status.HTTP_200_OK)
+            else:
+                return Response({'Error':'No existe el dato buscado'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        except Exception as e:
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
