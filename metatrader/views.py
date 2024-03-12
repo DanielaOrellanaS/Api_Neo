@@ -652,6 +652,11 @@ class robot_neopipsApiView(viewsets.ModelViewSet):
 class SentCustomNotifications(APIView):
     def post(self, request, *args, **kwargs):
         notification_data = request.data.get("message").get("notification")
+        user = request.data.get("user") 
+        user_token = self._get_user_token(user)
+        
+        if not user_token:
+            return Response({"error": "Token de usuario no encontrado"}, status=status.HTTP_400_BAD_REQUEST)
 
         data = {
             "message": {
@@ -659,7 +664,7 @@ class SentCustomNotifications(APIView):
                     "title": notification_data.get("title"),
                     "body": notification_data.get("body")
                 },
-                "token": request.data.get("message").get("token")
+                "token": user_token
             }
         }
 
@@ -685,6 +690,19 @@ class SentCustomNotifications(APIView):
         request = google.auth.transport.requests.Request()
         credentials.refresh(request)
         return credentials.token
+
+    def _get_user_token(self, user):
+        response = self.request_device_token(user)
+        if response.status_code == 200:
+            data = response.json()  
+            return data[0].get("token")
+        else:
+            return None
+    
+    def request_device_token(self, user):
+        url = f"https://tradinapi.azurewebsites.net/token/?user={user}"
+        response = requests.get(url)
+        return response
 
     
 class SentNotifications(APIView):
