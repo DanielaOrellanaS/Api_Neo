@@ -388,7 +388,7 @@ class robot_neoApiView(viewsets.ModelViewSet):
                 fecha_server = datetime.now()+timedelta(hours=2)
                 fecha2_server = datetime.fromisoformat(str(fecha_server)).replace(tzinfo=timezone.utc)
                 
-                if fecha>=fecha2_server-timedelta(hours=1):
+                if fecha>=fecha2_server-timedelta(hours=3):
                     return Response({'PC1_{}'.format(data['par']):data_ser['pc1']}, status=status.HTTP_200_OK)
                 else:
                     return Response({'Datos no actualizados de par {}, se devuelve indicador neutro: '.format(data['par']):0,
