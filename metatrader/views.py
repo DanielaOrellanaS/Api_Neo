@@ -707,6 +707,7 @@ class SentCustomNotifications(APIView):
     
 class SentNotifications(APIView):
     def post(self, request, *args, **kwargs):
+        print("Recibida solicitud POST a SentNotifications")
         #Api google FCM
         url = "https://fcm.googleapis.com/v1/projects/app-trading-notifications/messages:send"
         #Obtener tokens almacenados
@@ -716,7 +717,6 @@ class SentNotifications(APIView):
 
         for token_info in tokens_data:
             token = token_info.get("token")
-            print("TOKEN: ", token)
             data = {
                 "message": {
                     "notification": {
@@ -734,10 +734,10 @@ class SentNotifications(APIView):
             }
             response = requests.post(url, json=data, headers=headers)
             print("RESPUESTA: ", response.text)
-        
         if response.status_code == 200:
             return Response({"message": "Notificación enviada exitosamente"}, status=status.HTTP_200_OK)
         else:
+            print("Error al enviar la notificación a FCM")
             return Response({"error": "Error al enviar la notificación a FCM"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     def _get_access_token(self):  
         credentials = service_account.Credentials.from_service_account_file(
