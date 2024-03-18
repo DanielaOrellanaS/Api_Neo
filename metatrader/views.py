@@ -680,7 +680,7 @@ class SentCustomNotifications(APIView):
         print("RESPUESTA: ", response.text)
 
         if response.status_code == 200:
-            return Response({"message": "Notificación enviada exitosamente"}, status=status.HTTP_200_OK)
+            return Response({"message": "Notificacion enviada exitosamente"}, status=status.HTTP_200_OK)
         else:
             print("Error al enviar la notificación a FCM:", response.status_code)
             return Response({"error": "Error al enviar la notificación a FCM"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
