@@ -20,6 +20,7 @@ mimetypes.add_type('text/javascript','.js',True)
 
 from django.contrib.messages import constants as message_constants
 from django.contrib.messages.api import success
+from opencensus.trace import config_integration
 #from databricks import DatabricksConnect
 
 # Configura las credenciales
@@ -41,7 +42,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'django-insecure-^hlv4!jfa4kp2p-8)qj5la!%vgoxnah6p1allj-2y*i_)$uj(8'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -74,8 +75,48 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'opencensus.ext.django.middleware.OpencensusMiddleware',
     'corsheaders.middleware.CorsMiddleware'
 ]
+
+OPENCENSUS = {
+    'TRACE': {
+        'SAMPLER': 'opencensus.trace.samplers.ProbabilitySampler(rate=1)',
+        'EXPORTER': 'opencensus.ext.azure.trace_exporter.AzureExporter(connection_string="InstrumentationKey=2e03e6a4-9984-41ab-a0fb-88531bb92920")',
+        'EXCLUDELIST_PATHS': ['https://example.com'], 
+    }
+}
+
+
+config_integration.trace_integrations(['requests','logging','postgresql'])
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "azure_verbose": {
+            "format": "%(asctime)s | %(levelname)s | %(message)s"
+        },
+    },
+    "handlers": {
+        "stdout": {
+            "level": "DEBUG",
+            "class": "logging.StreamHandler",
+            "formatter": "azure_verbose",
+        },
+        "log_to_azure_ai": {
+            "level": "DEBUG",
+            "class": "opencensus.ext.azure.log_exporter.AzureLogHandler",
+            "connection_string": "InstrumentationKey=dd16e43e-2db0-4b10-8b7f-c54046f81080",
+            "formatter": "azure_verbose",
+        },
+    },
+    "loggers": {
+        'django': {
+            'handlers': ['stdout', 'log_to_file','log_to_azure_ai'],
+            'level': 'DEBUG',
+        },
+    }
+}
 
 ROOT_URLCONF = 'neo.urls'
 
