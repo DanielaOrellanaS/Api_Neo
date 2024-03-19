@@ -671,13 +671,13 @@ class SentCustomNotifications(APIView):
         url = "https://fcm.googleapis.com/v1/projects/app-trading-notifications/messages:send"
         access_token = self._get_access_token()
         authorization_header = f"Bearer {access_token}"
+        print("TOKEN DE AUTORIZACION: ", authorization_header)
         headers = {
             "Content-Type": "application/json",
             "Authorization": authorization_header
         }
 
         response = requests.post(url, json=data, headers=headers)
-        print("RESPUESTA: ", response.text)
 
         if response.status_code == 200:
             return Response({"message": "Notificacion enviada exitosamente"}, status=status.HTTP_200_OK)
