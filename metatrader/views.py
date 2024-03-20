@@ -757,7 +757,7 @@ class MonedaApiViewCopy(viewsets.ModelViewSet):
         url = "https://fcm.googleapis.com/v1/projects/app-trading-notifications/messages:send"
         headers = {
             "Content-Type": "application/json",
-            "Authorization": "Bearer ya29.a0Ad52N39xDLZlQdnHq0NVAqtgTzH-WzIv-81WrP2HfwaZJsMUE_8vc4ZIhvaD3qHLbBjJFly4ceBYPiqtC48zF1X51o-5acTVCX-rJlrv2_zzuF3V0HPbrc4V7LpMhT819ZKZvyjzxRYI873TI3ERMbqa3u-NsgMIOYNXaCgYKAVgSARESFQHGX2MiyPSzehG-J7wbbYlSE-e7lQ0171"
+            "Authorization": "Bearer ya29.a0Ad52N3-at4w9okCxmt459Cx6aeXqjhS9QMW7CJaU328LeszDhfVWqcRFFOmiTfVL6EJTnN1Mbo4TwYZDssP_GKxzW1BYIJ91CEwz7gXe0URh0KVOxrHFv5ZQaqxMNfohaX8ofc01nHwxv9kDbEyG9ORn7QiDOwNcvrWTqAaCgYKARsSARESFQHGX2MicNPI4WSC54PMzRHSKwfa7g0173"
         }
         data = {
             "message": {
@@ -803,7 +803,7 @@ class ParesApiViewCopy(viewsets.ModelViewSet):
         url = "https://fcm.googleapis.com/v1/projects/app-trading-notifications/messages:send"
         headers = {
             "Content-Type": "application/json",
-            "Authorization": "Bearer ya29.a0Ad52N39xDLZlQdnHq0NVAqtgTzH-WzIv-81WrP2HfwaZJsMUE_8vc4ZIhvaD3qHLbBjJFly4ceBYPiqtC48zF1X51o-5acTVCX-rJlrv2_zzuF3V0HPbrc4V7LpMhT819ZKZvyjzxRYI873TI3ERMbqa3u-NsgMIOYNXaCgYKAVgSARESFQHGX2MiyPSzehG-J7wbbYlSE-e7lQ0171"
+            "Authorization": "Bearer ya29.a0Ad52N3-at4w9okCxmt459Cx6aeXqjhS9QMW7CJaU328LeszDhfVWqcRFFOmiTfVL6EJTnN1Mbo4TwYZDssP_GKxzW1BYIJ91CEwz7gXe0URh0KVOxrHFv5ZQaqxMNfohaX8ofc01nHwxv9kDbEyG9ORn7QiDOwNcvrWTqAaCgYKARsSARESFQHGX2MicNPI4WSC54PMzRHSKwfa7g0173"
         }
         data = {
             "message": {
