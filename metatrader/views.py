@@ -750,51 +750,35 @@ class SentNotifications(APIView):
         return credentials.token
     
 #FUNCIONAL
-class ParesApiViewCopy(viewsets.ModelViewSet):
+class SentNotificationAllDevices(viewsets.ModelViewSet):
     serializer_class = ParesSerializer
     queryset = Pares.objects.using('postgres').all()
     def create(self, request, *args, **kwargs):
         access_token = self._get_access_token()
         authorization_header = f"Bearer {access_token}"
         url = "https://fcm.googleapis.com/v1/projects/app-trading-notifications/messages:send"
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": authorization_header
-        }
-        data = {
-            "message": {
-                "notification": {
-                    "title": "Pares api",
-                    "body": "Probando metodo get token"
-                },
-                "token": "eLFVJsgFTO2EtjlS-nYNPM:APA91bFbtCpqBvrFRaUNSKQjDYf_JNWhncXoT35hznsXH8bRPRQqeUentE4kRLOgZrgsse_ua2FE2A22TUxMuYs2nqlAfUgNFzOlYbb8WBgKpE2TYoGie4HLvCY8oBYjHLC9fawZGm7G"
+        tokens_data_device = requests.get("https://tradinapi.azurewebsites.net/token/").json()
+        for token_info in tokens_data_device:
+            token_device = token_info.get("token")
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": authorization_header
             }
-        }
-        data2 = {
-            "message": {
-                "notification": {
-                    "title": "Pares api",
-                    "body": "Personalizando notificaciones por usuarios"
-                },
-                "token": "eU2I7IOeaC9jzZEJcTIgJq:APA91bEbukRQrocatYfS6Thoj6ZewgCSinKKFje_JULFsv8OEIz22Fr0S5F3d8HW8TzibqABsH2rEXG1Tc_mUhsRZTYysJLC1626g8QhDB3OWrwuhBBPh7RBrUtG9wO9RrDmjbtUHXgS"
-            }
-        }
-        serializer = ParesSerializer(data=request.data)
-        if(serializer.is_valid()):
-            requests.post(url, json=data, headers=headers)
-            requests.post(url, json=data2, headers=headers)
-            try:
-                data=eval(list(request.data)[0].replace('\0', ''))
-                id = data['id']
-                pares = data['pares']
-                Pares(id=id, pares=pares)
-            except Exception as e:
-                return Response({'Message':str(e)}, status=status.HTTP_400_BAD_REQUEST)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            data = {
+                "message": {
+                    "notification": {
+                        "title": "NOTICIA!",
+                        "body": "Enviando desde produccion con metodo get y con token de cada dispositivo"
+                    },
+                    "token": token_device
+                }
+            }   
+            response = requests.post(url, json=data, headers=headers)
+        if response.status_code == 200:
+            return Response({"message": "Notificación enviada exitosamente"}, status=status.HTTP_200_OK)
         else:
-            requests.post(url, json=data, headers=headers)
-            requests.post(url, json=data2, headers=headers)
-            return Response({'Error':'Dato no valido'}, status=status.HTTP_400_BAD_REQUEST)
+            print("Error al enviar la notificación a FCM")
+            return Response({"error": "Error al enviar la notificación a FCM"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     def _get_access_token(self):  
         credentials = service_account.Credentials.from_service_account_file(
             'service-account-file.json', scopes=['https://www.googleapis.com/auth/cloud-platform'])
