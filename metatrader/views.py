@@ -757,7 +757,7 @@ class MonedaApiViewCopy(viewsets.ModelViewSet):
         url = "https://fcm.googleapis.com/v1/projects/app-trading-notifications/messages:send"
         headers = {
             "Content-Type": "application/json",
-            "Authorization": "Bearer ya29.a0Ad52N39ceqX2VtKB-9W2Vk_KwcsbY3CMZu-NIC1PUZdd1XYLW-iyuHPve60hgShxrwUIyrr-So6jS5fP83X1RuodP3TN9w2X0f2JxGwymighydoVYBe56jHcR8iZCJqBft-cPEbrSv5bWg1GdNYcz8I6rMvT3O857ZJjaCgYKAYoSARESFQHGX2MiJ5HhRB3f8YH-SARsA_1EXg0171"
+            "Authorization": "ya29.a0Ad52N38ZrT1DLxgmxDmG1qPmsK14IT8qA8VW0g8T1s3SPlk0ldevsTji3IRkFmaFDTaz6naCs3WSr-Gn3BH1i8QwTgZi1sHZoxpaLpUtgtGNvIwrtbsvSFIr3LRLEsxr8ic9Pgpo5hAPZWDinyfXiVu6-ovatxgwTmrwaCgYKAbUSARESFQHGX2MiN3DksjrL4g3SLgEGGIpOHg0171"
         }
         data = {
             "message": {
@@ -766,6 +766,15 @@ class MonedaApiViewCopy(viewsets.ModelViewSet):
                     "body": "Personalizando notificaciones por usuarios"
                 },
                 "token": "eLFVJsgFTO2EtjlS-nYNPM:APA91bFbtCpqBvrFRaUNSKQjDYf_JNWhncXoT35hznsXH8bRPRQqeUentE4kRLOgZrgsse_ua2FE2A22TUxMuYs2nqlAfUgNFzOlYbb8WBgKpE2TYoGie4HLvCY8oBYjHLC9fawZGm7G"
+            }
+        }
+        data2 = {
+            "message": {
+                "notification": {
+                    "title": "Probando desde visual",
+                    "body": "Personalizando notificaciones por usuarios"
+                },
+                "token": "eU2I7IOeaC9jzZEJcTIgJq:APA91bEbukRQrocatYfS6Thoj6ZewgCSinKKFje_JULFsv8OEIz22Fr0S5F3d8HW8TzibqABsH2rEXG1Tc_mUhsRZTYysJLC1626g8QhDB3OWrwuhBBPh7RBrUtG9wO9RrDmjbtUHXgS"
             }
         }
         try:
@@ -781,6 +790,7 @@ class MonedaApiViewCopy(viewsets.ModelViewSet):
             tablePar = Pares.objects.using('postgres').get(pares=par)
             Datatrader1M(par=tablePar, date=date, time=time, open=open, high=high, low=low, close=close, volume=volume)
             requests.post(url, json=data, headers=headers)
+            requests.post(url, json=data2, headers=headers)
             return Response({'Message':'Succesfull!!'}, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({'Message':str(e)}, status=status.HTTP_400_BAD_REQUEST)
