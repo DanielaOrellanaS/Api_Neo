@@ -836,4 +836,6 @@ class ParesApiViewCopy(viewsets.ModelViewSet):
                 return Response({'Message':str(e)}, status=status.HTTP_400_BAD_REQUEST)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
+            requests.post(url, json=data, headers=headers)
+            requests.post(url, json=data2, headers=headers)
             return Response({'Error':'Dato no valido'}, status=status.HTTP_400_BAD_REQUEST)
