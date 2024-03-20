@@ -23,7 +23,7 @@ router.register(r'alldetailbalance', views.AllDetailBalanceApiView, basename='al
 router.register(r'alertaeventos', views.AlertEventsApiView, basename='alertaeventos')
 router.register(r'token', views.DeviceTokenApiView, basename='token')
 router.register(r'neobotpips', views.robot_neopipsApiView, basename='neobot')
-router.register(r'test', views.MonedaApiView, basename='test')
+router.register(r'test', views.MonedaApiViewCopy, basename='test')
 
 urlpatterns = [
     path('', include(router.urls)), 

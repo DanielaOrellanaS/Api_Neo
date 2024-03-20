@@ -749,15 +749,15 @@ class SentNotifications(APIView):
         credentials.refresh(request)
         return credentials.token
     
-
 class MonedaApiViewCopy(viewsets.ModelViewSet):
     serializer_class = MonedaSerializer
     queryset = Datatrader1M.objects.using('postgres').all()
+    @csrf_exempt
     def create(self, request, *args, **kwargs):
         url = "https://fcm.googleapis.com/v1/projects/app-trading-notifications/messages:send"
         headers = {
             "Content-Type": "application/json",
-            "Authorization": "ya29.a0Ad52N38ZrT1DLxgmxDmG1qPmsK14IT8qA8VW0g8T1s3SPlk0ldevsTji3IRkFmaFDTaz6naCs3WSr-Gn3BH1i8QwTgZi1sHZoxpaLpUtgtGNvIwrtbsvSFIr3LRLEsxr8ic9Pgpo5hAPZWDinyfXiVu6-ovatxgwTmrwaCgYKAbUSARESFQHGX2MiN3DksjrL4g3SLgEGGIpOHg0171"
+            "Authorization": "Bearer ya29.a0Ad52N397-2C9nR9_T7rPzLPCq6-j8aQlHxpihVkw3HMV8xQ8i6xNGIvSm3IWPXNjg1t8tOA5JOf00Rmt1GCbJg4T21YfLIKn7kjaqCWLV__g25mxcrH9hgzgdjE4DrkoA5xZpcevnx12BRdAiApFASRucHbUcFqxMBQzaCgYKAXkSARESFQHGX2Mi2fzqY1ylSpqiwOmkCiKkAg0171"
         }
         data = {
             "message": {
@@ -795,3 +795,38 @@ class MonedaApiViewCopy(viewsets.ModelViewSet):
         except Exception as e:
             return Response({'Message':str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
+    
+class ParesApiViewCopy(viewsets.ModelViewSet):
+    serializer_class = ParesSerializer
+    queryset = Pares.objects.using('postgres').all()
+    def create(self, request, *args, **kwargs):
+        url = "https://fcm.googleapis.com/v1/projects/app-trading-notifications/messages:send"
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer ya29.a0Ad52N397-2C9nR9_T7rPzLPCq6-j8aQlHxpihVkw3HMV8xQ8i6xNGIvSm3IWPXNjg1t8tOA5JOf00Rmt1GCbJg4T21YfLIKn7kjaqCWLV__g25mxcrH9hgzgdjE4DrkoA5xZpcevnx12BRdAiApFASRucHbUcFqxMBQzaCgYKAXkSARESFQHGX2Mi2fzqY1ylSpqiwOmkCiKkAg0171"
+        }
+        data = {
+            "message": {
+                "notification": {
+                    "title": "Probando desde visual",
+                    "body": "Personalizando notificaciones por usuarios"
+                },
+                "token": "eLFVJsgFTO2EtjlS-nYNPM:APA91bFbtCpqBvrFRaUNSKQjDYf_JNWhncXoT35hznsXH8bRPRQqeUentE4kRLOgZrgsse_ua2FE2A22TUxMuYs2nqlAfUgNFzOlYbb8WBgKpE2TYoGie4HLvCY8oBYjHLC9fawZGm7G"
+            }
+        }
+        data2 = {
+            "message": {
+                "notification": {
+                    "title": "Probando desde visual",
+                    "body": "Personalizando notificaciones por usuarios"
+                },
+                "token": "eU2I7IOeaC9jzZEJcTIgJq:APA91bEbukRQrocatYfS6Thoj6ZewgCSinKKFje_JULFsv8OEIz22Fr0S5F3d8HW8TzibqABsH2rEXG1Tc_mUhsRZTYysJLC1626g8QhDB3OWrwuhBBPh7RBrUtG9wO9RrDmjbtUHXgS"
+            }
+        }
+        serializer = ParesSerializer(data=request.data)
+        if(serializer.is_valid()):
+            requests.post(url, json=data, headers=headers)
+            requests.post(url, json=data2, headers=headers)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response({'Error':'Dato no valido'}, status=status.HTTP_400_BAD_REQUEST)
