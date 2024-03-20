@@ -758,6 +758,7 @@ class SentNotificationAllDevices(viewsets.ModelViewSet):
         authorization_header = f"Bearer {access_token}"
         url = "https://fcm.googleapis.com/v1/projects/app-trading-notifications/messages:send"
         tokens_data_device = requests.get("https://tradinapi.azurewebsites.net/token/").json()
+        json_request = request.data
         for token_info in tokens_data_device:
             token_device = token_info.get("token")
             headers = {
@@ -767,8 +768,8 @@ class SentNotificationAllDevices(viewsets.ModelViewSet):
             data = {
                 "message": {
                     "notification": {
-                        "title": "NOTICIA!",
-                        "body": "Enviando desde produccion con metodo get y con token de cada dispositivo"
+                        "title": json_request.get('title'),
+                        "body": json_request.get('body')
                     },
                     "token": token_device
                 }
