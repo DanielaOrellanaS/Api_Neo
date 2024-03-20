@@ -155,7 +155,7 @@ class AlertEvents(models.Model):
     par_name = models.CharField(db_column='par', max_length=25, blank=True, null=True)
     currency = models.CharField(db_column='currency', max_length=40)
     name = models.CharField(db_column='name', max_length=40)
-    fecha = models.DateField(db_column='fecha', blank=True, null=True)
+    fecha = models.DateTimeField(db_column='fecha', blank=True, null=True)
     pips_ant = models.FloatField(db_column='pips_ant', blank=True, null=True)
     count_events = models.BigIntegerField(db_column='count_events', blank=True, null=True)
     max_pips = models.FloatField(db_column='max_pips', blank=True, null=True)
