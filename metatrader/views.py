@@ -749,67 +749,23 @@ class SentNotifications(APIView):
         credentials.refresh(request)
         return credentials.token
     
-class MonedaApiViewCopy(viewsets.ModelViewSet):
-    serializer_class = MonedaSerializer
-    queryset = Datatrader1M.objects.using('postgres').all()
-    @csrf_exempt
-    def create(self, request, *args, **kwargs):
-        url = "https://fcm.googleapis.com/v1/projects/app-trading-notifications/messages:send"
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer ya29.a0Ad52N3-at4w9okCxmt459Cx6aeXqjhS9QMW7CJaU328LeszDhfVWqcRFFOmiTfVL6EJTnN1Mbo4TwYZDssP_GKxzW1BYIJ91CEwz7gXe0URh0KVOxrHFv5ZQaqxMNfohaX8ofc01nHwxv9kDbEyG9ORn7QiDOwNcvrWTqAaCgYKARsSARESFQHGX2MicNPI4WSC54PMzRHSKwfa7g0173"
-        }
-        data = {
-            "message": {
-                "notification": {
-                    "title": "Moneda api",
-                    "body": "Personalizando notificaciones por usuarios"
-                },
-                "token": "eLFVJsgFTO2EtjlS-nYNPM:APA91bFbtCpqBvrFRaUNSKQjDYf_JNWhncXoT35hznsXH8bRPRQqeUentE4kRLOgZrgsse_ua2FE2A22TUxMuYs2nqlAfUgNFzOlYbb8WBgKpE2TYoGie4HLvCY8oBYjHLC9fawZGm7G"
-            }
-        }
-        data2 = {
-            "message": {
-                "notification": {
-                    "title": "Moneda api",
-                    "body": "Personalizando notificaciones por usuarios"
-                },
-                "token": "eU2I7IOeaC9jzZEJcTIgJq:APA91bEbukRQrocatYfS6Thoj6ZewgCSinKKFje_JULFsv8OEIz22Fr0S5F3d8HW8TzibqABsH2rEXG1Tc_mUhsRZTYysJLC1626g8QhDB3OWrwuhBBPh7RBrUtG9wO9RrDmjbtUHXgS"
-            }
-        }
-        try:
-            data=eval(list(request.data)[0].replace('\0', ''))
-            par = data['par']
-            date = data['date']
-            time = data['time']
-            open = data['open']
-            high = data['high']
-            low = data['low']
-            close = data['close']
-            volume = data['volume']
-            tablePar = Pares.objects.using('postgres').get(pares=par)
-            Datatrader1M(par=tablePar, date=date, time=time, open=open, high=high, low=low, close=close, volume=volume)
-            response = requests.post(url, json=data, headers=headers)
-            requests.post(url, json=data2, headers=headers)
-            return Response({'Message':response.text}, status=status.HTTP_201_CREATED)
-        except Exception as e:
-            return Response({'Message':str(e)}, status=status.HTTP_400_BAD_REQUEST)
-    
-    
+#FUNCIONAL
 class ParesApiViewCopy(viewsets.ModelViewSet):
     serializer_class = ParesSerializer
     queryset = Pares.objects.using('postgres').all()
     def create(self, request, *args, **kwargs):
+        access_token = self._get_access_token()
+        authorization_header = f"Bearer {access_token}"
         url = "https://fcm.googleapis.com/v1/projects/app-trading-notifications/messages:send"
         headers = {
             "Content-Type": "application/json",
-            "Authorization": "Bearer ya29.a0Ad52N3-at4w9okCxmt459Cx6aeXqjhS9QMW7CJaU328LeszDhfVWqcRFFOmiTfVL6EJTnN1Mbo4TwYZDssP_GKxzW1BYIJ91CEwz7gXe0URh0KVOxrHFv5ZQaqxMNfohaX8ofc01nHwxv9kDbEyG9ORn7QiDOwNcvrWTqAaCgYKARsSARESFQHGX2MicNPI4WSC54PMzRHSKwfa7g0173"
+            "Authorization": authorization_header
         }
         data = {
             "message": {
                 "notification": {
                     "title": "Pares api",
-                    "body": "Personalizando notificaciones por usuarios"
+                    "body": "Probando metodo get token"
                 },
                 "token": "eLFVJsgFTO2EtjlS-nYNPM:APA91bFbtCpqBvrFRaUNSKQjDYf_JNWhncXoT35hznsXH8bRPRQqeUentE4kRLOgZrgsse_ua2FE2A22TUxMuYs2nqlAfUgNFzOlYbb8WBgKpE2TYoGie4HLvCY8oBYjHLC9fawZGm7G"
             }
@@ -839,3 +795,9 @@ class ParesApiViewCopy(viewsets.ModelViewSet):
             requests.post(url, json=data, headers=headers)
             requests.post(url, json=data2, headers=headers)
             return Response({'Error':'Dato no valido'}, status=status.HTTP_400_BAD_REQUEST)
+    def _get_access_token(self):  
+        credentials = service_account.Credentials.from_service_account_file(
+            'service-account-file.json', scopes=['https://www.googleapis.com/auth/cloud-platform'])
+        request = google.auth.transport.requests.Request()
+        credentials.refresh(request)
+        return credentials.token
