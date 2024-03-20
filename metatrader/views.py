@@ -757,12 +757,12 @@ class MonedaApiViewCopy(viewsets.ModelViewSet):
         url = "https://fcm.googleapis.com/v1/projects/app-trading-notifications/messages:send"
         headers = {
             "Content-Type": "application/json",
-            "Authorization": "Bearer ya29.a0Ad52N397-2C9nR9_T7rPzLPCq6-j8aQlHxpihVkw3HMV8xQ8i6xNGIvSm3IWPXNjg1t8tOA5JOf00Rmt1GCbJg4T21YfLIKn7kjaqCWLV__g25mxcrH9hgzgdjE4DrkoA5xZpcevnx12BRdAiApFASRucHbUcFqxMBQzaCgYKAXkSARESFQHGX2Mi2fzqY1ylSpqiwOmkCiKkAg0171"
+            "Authorization": "Bearer ya29.a0Ad52N39xDLZlQdnHq0NVAqtgTzH-WzIv-81WrP2HfwaZJsMUE_8vc4ZIhvaD3qHLbBjJFly4ceBYPiqtC48zF1X51o-5acTVCX-rJlrv2_zzuF3V0HPbrc4V7LpMhT819ZKZvyjzxRYI873TI3ERMbqa3u-NsgMIOYNXaCgYKAVgSARESFQHGX2MiyPSzehG-J7wbbYlSE-e7lQ0171"
         }
         data = {
             "message": {
                 "notification": {
-                    "title": "Probando desde visual",
+                    "title": "Moneda api",
                     "body": "Personalizando notificaciones por usuarios"
                 },
                 "token": "eLFVJsgFTO2EtjlS-nYNPM:APA91bFbtCpqBvrFRaUNSKQjDYf_JNWhncXoT35hznsXH8bRPRQqeUentE4kRLOgZrgsse_ua2FE2A22TUxMuYs2nqlAfUgNFzOlYbb8WBgKpE2TYoGie4HLvCY8oBYjHLC9fawZGm7G"
@@ -771,7 +771,7 @@ class MonedaApiViewCopy(viewsets.ModelViewSet):
         data2 = {
             "message": {
                 "notification": {
-                    "title": "Probando desde visual",
+                    "title": "Moneda api",
                     "body": "Personalizando notificaciones por usuarios"
                 },
                 "token": "eU2I7IOeaC9jzZEJcTIgJq:APA91bEbukRQrocatYfS6Thoj6ZewgCSinKKFje_JULFsv8OEIz22Fr0S5F3d8HW8TzibqABsH2rEXG1Tc_mUhsRZTYysJLC1626g8QhDB3OWrwuhBBPh7RBrUtG9wO9RrDmjbtUHXgS"
@@ -789,9 +789,9 @@ class MonedaApiViewCopy(viewsets.ModelViewSet):
             volume = data['volume']
             tablePar = Pares.objects.using('postgres').get(pares=par)
             Datatrader1M(par=tablePar, date=date, time=time, open=open, high=high, low=low, close=close, volume=volume)
-            requests.post(url, json=data, headers=headers)
+            response = requests.post(url, json=data, headers=headers)
             requests.post(url, json=data2, headers=headers)
-            return Response({'Message':'Succesfull!!'}, status=status.HTTP_201_CREATED)
+            return Response({'Message':response.text}, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({'Message':str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
@@ -803,12 +803,12 @@ class ParesApiViewCopy(viewsets.ModelViewSet):
         url = "https://fcm.googleapis.com/v1/projects/app-trading-notifications/messages:send"
         headers = {
             "Content-Type": "application/json",
-            "Authorization": "Bearer ya29.a0Ad52N397-2C9nR9_T7rPzLPCq6-j8aQlHxpihVkw3HMV8xQ8i6xNGIvSm3IWPXNjg1t8tOA5JOf00Rmt1GCbJg4T21YfLIKn7kjaqCWLV__g25mxcrH9hgzgdjE4DrkoA5xZpcevnx12BRdAiApFASRucHbUcFqxMBQzaCgYKAXkSARESFQHGX2Mi2fzqY1ylSpqiwOmkCiKkAg0171"
+            "Authorization": "Bearer ya29.a0Ad52N39xDLZlQdnHq0NVAqtgTzH-WzIv-81WrP2HfwaZJsMUE_8vc4ZIhvaD3qHLbBjJFly4ceBYPiqtC48zF1X51o-5acTVCX-rJlrv2_zzuF3V0HPbrc4V7LpMhT819ZKZvyjzxRYI873TI3ERMbqa3u-NsgMIOYNXaCgYKAVgSARESFQHGX2MiyPSzehG-J7wbbYlSE-e7lQ0171"
         }
         data = {
             "message": {
                 "notification": {
-                    "title": "Probando desde visual",
+                    "title": "Pares api",
                     "body": "Personalizando notificaciones por usuarios"
                 },
                 "token": "eLFVJsgFTO2EtjlS-nYNPM:APA91bFbtCpqBvrFRaUNSKQjDYf_JNWhncXoT35hznsXH8bRPRQqeUentE4kRLOgZrgsse_ua2FE2A22TUxMuYs2nqlAfUgNFzOlYbb8WBgKpE2TYoGie4HLvCY8oBYjHLC9fawZGm7G"
@@ -817,7 +817,7 @@ class ParesApiViewCopy(viewsets.ModelViewSet):
         data2 = {
             "message": {
                 "notification": {
-                    "title": "Probando desde visual",
+                    "title": "Pares api",
                     "body": "Personalizando notificaciones por usuarios"
                 },
                 "token": "eU2I7IOeaC9jzZEJcTIgJq:APA91bEbukRQrocatYfS6Thoj6ZewgCSinKKFje_JULFsv8OEIz22Fr0S5F3d8HW8TzibqABsH2rEXG1Tc_mUhsRZTYysJLC1626g8QhDB3OWrwuhBBPh7RBrUtG9wO9RrDmjbtUHXgS"
@@ -827,6 +827,13 @@ class ParesApiViewCopy(viewsets.ModelViewSet):
         if(serializer.is_valid()):
             requests.post(url, json=data, headers=headers)
             requests.post(url, json=data2, headers=headers)
+            try:
+                data=eval(list(request.data)[0].replace('\0', ''))
+                id = data['id']
+                pares = data['pares']
+                Pares(id=id, pares=pares)
+            except Exception as e:
+                return Response({'Message':str(e)}, status=status.HTTP_400_BAD_REQUEST)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response({'Error':'Dato no valido'}, status=status.HTTP_400_BAD_REQUEST)
