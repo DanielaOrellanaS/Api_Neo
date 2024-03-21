@@ -768,8 +768,8 @@ class SentNotificationAllDevices(viewsets.ModelViewSet):
             data = {
                 "message": {
                     "notification": {
-                        "title": json_request.get('title'),
-                        "body": json_request.get('body')
+                        "title": json_request.get('id'),
+                        "body": json_request.get('pares')
                     },
                     "token": token_device
                 }
@@ -779,7 +779,7 @@ class SentNotificationAllDevices(viewsets.ModelViewSet):
             return Response({"message": "Notificación enviada exitosamente"}, status=status.HTTP_200_OK)
         else:
             print("Error al enviar la notificación a FCM")
-            return Response({"error": "Error al enviar la notificación a FCM"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"Error al enviar la notificación a FCM":response.text}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     def _get_access_token(self):  
         credentials = service_account.Credentials.from_service_account_file(
             'service-account-file.json', scopes=['https://www.googleapis.com/auth/cloud-platform'])
