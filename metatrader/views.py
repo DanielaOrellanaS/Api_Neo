@@ -16,6 +16,8 @@ from rest_framework.views import APIView
 import google.auth
 import google.auth.transport.requests
 from google.oauth2 import service_account
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import never_cache
 
 class ParesApiView(viewsets.ModelViewSet):
     serializer_class = ParesSerializer
@@ -569,11 +571,12 @@ class AlertEventsApiView(viewsets.ModelViewSet):
 
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
+        
 class DeviceTokenApiView(viewsets.ModelViewSet):
     serializer_class = DeviceTokenSerializer
     queryset = DeviceToken.objects.using('postgres').all()
 
+    @method_decorator(never_cache)
     def list(self, request, *args, **kwargs):
         user = request.query_params.get('user', None)
         if user:
