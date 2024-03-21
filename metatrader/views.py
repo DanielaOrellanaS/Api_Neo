@@ -776,7 +776,7 @@ class SentNotificationAllDevices(viewsets.ModelViewSet):
             }   
             response = requests.post(url, json=data, headers=headers)
         if response.status_code == 200:
-            return Response({"message": "Notificación enviada exitosamente"}, status=status.HTTP_200_OK)
+            return Response({"Notificación enviada exitosamente":response.text}, status=status.HTTP_200_OK)
         else:
             print("Error al enviar la notificación a FCM")
             return Response({"Error al enviar la notificación a FCM":response.text}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
