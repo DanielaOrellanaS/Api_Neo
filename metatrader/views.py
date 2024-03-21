@@ -768,8 +768,8 @@ class SentNotificationAllDevices(viewsets.ModelViewSet):
             data = {
                 "message": {
                     "notification": {
-                        "title": json_request.get('id'),
-                        "body": json_request.get('pares')
+                        "title": "Titulo prueba",
+                        "body": "Probando desde codigo"
                     },
                     "token": token_device
                 }
