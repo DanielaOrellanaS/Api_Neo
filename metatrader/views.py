@@ -12,7 +12,6 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
 import requests
-from rest_framework.views import APIView
 import google.auth
 import google.auth.transport.requests
 from google.oauth2 import service_account
@@ -651,106 +650,6 @@ class robot_neopipsApiView(viewsets.ModelViewSet):
             
         except Exception as e:
             return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
-
-class SentCustomNotifications(APIView):
-    def post(self, request, *args, **kwargs):
-        notification_data = request.data.get("message").get("notification")
-        user = request.data.get("message").get("user")
-        user_token = self._get_user_token(user)
-        if not user_token:
-            print("No se encontró el token de usuario")
-            return Response({"error": "Token de usuario no encontrado"}, status=status.HTTP_400_BAD_REQUEST)
-
-        data = {
-            "message": {
-                "notification": {
-                    "title": notification_data.get("title"),
-                    "body": notification_data.get("body")
-                },
-                "token": user_token
-            }
-        }
-
-        url = "https://fcm.googleapis.com/v1/projects/app-trading-notifications/messages:send"
-        access_token = self._get_access_token()
-        authorization_header = f"Bearer {access_token}"
-        print("TOKEN DE AUTORIZACION: ", authorization_header)
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": authorization_header
-        }
-
-        response = requests.post(url, json=data, headers=headers)
-
-        if response.status_code == 200:
-            return Response({"message": "Notificacion enviada exitosamente"}, status=status.HTTP_200_OK)
-        else:
-            print("Error al enviar la notificación a FCM:", response.status_code)
-            return Response({"error": "Error al enviar la notificación a FCM"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    def _get_access_token(self):  
-        credentials = service_account.Credentials.from_service_account_file(
-            'service-account-file.json', scopes=['https://www.googleapis.com/auth/cloud-platform'])
-        request = google.auth.transport.requests.Request()
-        credentials.refresh(request)
-        return credentials.token
-
-    def _get_user_token(self, user):
-        response = self.request_device_token(user)
-        if response.status_code == 200:
-            data = response.json()  
-            return data[0].get("token")
-        else:
-            print("Error al obtener el token de usuario:", response.status_code)
-            return None
-    
-    def request_device_token(self, user):
-        url = f"https://tradinapi.azurewebsites.net/token/?user={user}"
-        response = requests.get(url)
-        print("Respuesta de solicitud de token de dispositivo:", response.text)
-        return response
-
-
-class SentNotifications(APIView):
-    def post(self, request, *args, **kwargs):
-        print("Recibida solicitud POST a SentNotifications")
-        #Api google FCM
-        url = "https://fcm.googleapis.com/v1/projects/app-trading-notifications/messages:send"
-        #Obtener tokens almacenados
-        tokens_data = requests.get("https://tradinapi.azurewebsites.net/token/").json()
-        #Obtener el cuerpo de la notificacion
-        notification_data = request.data.get("message").get("notification")
-
-        for token_info in tokens_data:
-            token = token_info.get("token")
-            data = {
-                "message": {
-                    "notification": {
-                        "title": notification_data.get("title"),
-                        "body": notification_data.get("body")
-                    },
-                    "token": token
-                }
-            }
-            access_token = self._get_access_token()
-            authorization_header = f"Bearer {access_token}"
-            headers = {
-                "Content-Type": "application/json",
-                "Authorization": authorization_header
-            }
-            response = requests.post(url, json=data, headers=headers)
-            print("RESPUESTA: ", response.text)
-        if response.status_code == 200:
-            return Response({"message": "Notificación enviada exitosamente"}, status=status.HTTP_200_OK)
-        else:
-            print("Error al enviar la notificación a FCM")
-            return Response({"error": "Error al enviar la notificación a FCM"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    def _get_access_token(self):  
-        credentials = service_account.Credentials.from_service_account_file(
-            'service-account-file.json', scopes=['https://www.googleapis.com/auth/cloud-platform'])
-        request = google.auth.transport.requests.Request()
-        credentials.refresh(request)
-        return credentials.token
     
 #FUNCIONAL
 class SentNotificationAllDevices(viewsets.ModelViewSet):
