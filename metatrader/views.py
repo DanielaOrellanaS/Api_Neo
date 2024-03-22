@@ -762,6 +762,8 @@ class SentNotificationAllDevices(viewsets.ModelViewSet):
         url = "https://fcm.googleapis.com/v1/projects/app-trading-notifications/messages:send"
         tokens_data_device = requests.get("https://tradinapi.azurewebsites.net/token/").json()
         json_request = request.data
+        title = json_request.get('id')
+        body = json_request.get('pares')
         for token_info in tokens_data_device:
             token_device = token_info.get("token")
             headers = {
@@ -771,12 +773,12 @@ class SentNotificationAllDevices(viewsets.ModelViewSet):
             data = {
                 "message": {
                     "notification": {
-                        "title": "Titulo prueba",
-                        "body": "Probando desde codigo"
+                        "title": title if title else "Titulo",
+                        "body": body if body else "Body"
                     },
                     "token": token_device
                 }
-            }   
+            }
             response = requests.post(url, json=data, headers=headers)
         if response.status_code == 200:
             return Response({"Notificación enviada exitosamente":response.text}, status=status.HTTP_200_OK)
