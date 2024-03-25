@@ -655,43 +655,46 @@ class robot_neopipsApiView(viewsets.ModelViewSet):
 class SentNotificationAllDevices(viewsets.ModelViewSet):
     serializer_class = ParesSerializer
     queryset = Pares.objects.using('postgres').all()
-    
     def create(self, request, *args, **kwargs):
         access_token = self._get_access_token()
         authorization_header = f"Bearer {access_token}"
         url = "https://fcm.googleapis.com/v1/projects/app-trading-notifications/messages:send"
         tokens_data_device = requests.get("https://tradinapi.azurewebsites.net/token/").json()
-        json_request = request.data
-        title = json_request.get('id')
-        body = json_request.get('pares')
-        success_count = 0
-        error_count = 0
-        for token_info in tokens_data_device:
-            token_device = token_info.get("token")
-            headers = {
-                "Content-Type": "application/json",
-                "Authorization": authorization_header
-            }
-            data = {
-                "message": {
-                    "notification": {
-                        "title": title,
-                        "body": body
-                    },
-                    "token": token_device
+        
+        serializer = ParesSerializer(data=request.data)
+        if serializer.is_valid():
+            id = serializer.validated_data.get('id')
+            body = serializer.validated_data.get('pares')
+            success_count = 0
+            error_count = 0
+            for token_info in tokens_data_device:
+                token_device = token_info.get("token")
+                headers = {
+                    "Content-Type": "application/json",
+                    "Authorization": authorization_header
                 }
-            }
-            response = requests.post(url, json=data, headers=headers)
-            if response.status_code == 200:
-                success_count += 1
-            else:
-                error_count += 1
-                print(f"Error al enviar la notificación a FCM para el token {token_device}. Detalles: {response.text}")
+                data = {
+                    "message": {
+                        "notification": {
+                            "title": "ALERTA!",
+                            "body": body
+                        },
+                        "token": token_device
+                    }
+                }
+                response = requests.post(url, json=data, headers=headers)
+                if response.status_code == 200:
+                    success_count += 1
+                else:
+                    error_count += 1
+                    print(f"Error al enviar la notificación a FCM para el token {token_device}. Detalles: {response.text}")
 
-        if error_count == 0:
-            return Response({"message": f"La notificacion ({title, body}) se envio exitosamente."}, status=status.HTTP_200_OK)
+            if error_count == 0:
+                return Response({"message": f"La notificacion ({id}, {body}) se envio exitosamente."}, status=status.HTTP_200_OK)
+            else:
+                return Response({"message": f"Se enviaron {success_count} notificaciones exitosamente, pero ocurrieron errores al enviar {error_count} notificaciones. Por favor, revisa los registros del servidor para más detalles."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         else:
-            return Response({"message": f"Se enviaron {success_count} notificaciones exitosamente, pero ocurrieron errores al enviar {error_count} notificaciones. Por favor, revisa los registros del servidor para más detalles."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"message": "Error en los datos del JSON recibido."}, status=status.HTTP_400_BAD_REQUEST)
     def _get_access_token(self):  
         credentials = service_account.Credentials.from_service_account_file(
             'service-account-file.json', scopes=['https://www.googleapis.com/auth/cloud-platform'])
