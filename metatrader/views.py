@@ -650,17 +650,22 @@ class robot_neopipsApiView(viewsets.ModelViewSet):
             
         except Exception as e:
             return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
-    
+       
 #FUNCIONAL
 class SentNotificationAllDevices(viewsets.ModelViewSet):
     serializer_class = ParesSerializer
     queryset = Pares.objects.using('postgres').all()
+    
     def create(self, request, *args, **kwargs):
         access_token = self._get_access_token()
         authorization_header = f"Bearer {access_token}"
         url = "https://fcm.googleapis.com/v1/projects/app-trading-notifications/messages:send"
         tokens_data_device = requests.get("https://tradinapi.azurewebsites.net/token/").json()
         json_request = request.data
+        title = json_request.get('id')
+        body = json_request.get('pares')
+        success_count = 0
+        error_count = 0
         for token_info in tokens_data_device:
             token_device = token_info.get("token")
             headers = {
@@ -670,18 +675,23 @@ class SentNotificationAllDevices(viewsets.ModelViewSet):
             data = {
                 "message": {
                     "notification": {
-                        "title": "Prueba",
-                        "body": "Prueba"
+                        "title": title,
+                        "body": body
                     },
                     "token": token_device
                 }
             }
             response = requests.post(url, json=data, headers=headers)
-        if response.status_code == 200:
-            return Response({"Notificación enviada exitosamente":response.text}, status=status.HTTP_200_OK)
+            if response.status_code == 200:
+                success_count += 1
+            else:
+                error_count += 1
+                print(f"Error al enviar la notificación a FCM para el token {token_device}. Detalles: {response.text}")
+
+        if error_count == 0:
+            return Response({"message": f"La notificacion ({title, body}) se envio exitosamente."}, status=status.HTTP_200_OK)
         else:
-            print("Error al enviar la notificación a FCM")
-            return Response({"Error al enviar la notificación a FCM":response.text}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"message": f"Se enviaron {success_count} notificaciones exitosamente, pero ocurrieron errores al enviar {error_count} notificaciones. Por favor, revisa los registros del servidor para más detalles."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     def _get_access_token(self):  
         credentials = service_account.Credentials.from_service_account_file(
             'service-account-file.json', scopes=['https://www.googleapis.com/auth/cloud-platform'])
