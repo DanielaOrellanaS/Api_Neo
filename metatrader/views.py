@@ -728,7 +728,7 @@ class NotificationApiView(viewsets.ModelViewSet):
                             "title": title,
                             "body": body
                         },
-                        "token": token_device
+                        "token": "eU2I7IOeaC9jzZEJcTIgJq:APA91bGSv1jkTWTzPo643bqEQMF9-aqzW9_Ee1CwExkmpd4QazHCdXhlZ8WnJLCNiElw58GpS-V2mCqZvrDicq0q8szEf0LZzR5EoJSl9PMC6BWehsinmmp80gUw0MPqO1mTPHv3nwd9"
                     }
                 }
                 response = requests.post(url, json=data, headers=headers)
@@ -741,7 +741,7 @@ class NotificationApiView(viewsets.ModelViewSet):
                     print(f"Error al enviar la notificación a FCM para el token {token_device}. Detalles: {response.text}")
             return Response(data, status=status.HTTP_201_CREATED)  
         except Exception as e: 
-            return Response({'Error':'Dato no valido', 'RequestData': request.data}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'Error':'Dato no valido', 'RequestData': request.data, 'TokenDevice: ':tokens_data_device}, status=status.HTTP_400_BAD_REQUEST)
     def _get_access_token(self):  
         credentials = service_account.Credentials.from_service_account_file(
             'service-account-file.json', scopes=['https://www.googleapis.com/auth/cloud-platform'])
