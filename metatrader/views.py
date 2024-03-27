@@ -737,7 +737,7 @@ class NotificationApiView(viewsets.ModelViewSet):
                     print(f"Error al enviar la notificación a FCM para el token {token_device}. Detalles: {response.text}")
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else: 
-            return Response({'Error':'Dato no valido'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'Error':'Dato no valido', 'RequestData': request.data}, status=status.HTTP_400_BAD_REQUEST)
     def _get_access_token(self):  
         credentials = service_account.Credentials.from_service_account_file(
             'service-account-file.json', scopes=['https://www.googleapis.com/auth/cloud-platform'])
