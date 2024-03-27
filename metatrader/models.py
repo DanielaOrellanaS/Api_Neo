@@ -172,8 +172,6 @@ class DeviceToken(models.Model):
     class Meta:
         db_table = 'DeviceToken'
 
-
-
 class variacion_pips_estimacion(models.Model):
     par = models.ForeignKey(Pares, blank=True, null=True, on_delete=models.CASCADE)
     date = models.DateTimeField(db_column='Date', blank=True, null=True)
@@ -184,3 +182,11 @@ class variacion_pips_estimacion(models.Model):
 
     class Meta:
         db_table = 'VariacionPipsModel'
+
+class Notification(models.Model):
+    title = models.CharField(max_length=255)
+    body = models.CharField(max_length=255)
+    user = models.CharField(max_length=255)
+    
+    class Meta: 
+        db_table = 'Notification'

@@ -93,3 +93,8 @@ class VariacionPipsSerializer(serializers.ModelSerializer):
     class Meta:
         model = variacion_pips_estimacion
         fields = '__all__'
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta: 
+        model = Notification
+        fields = '__all__'
