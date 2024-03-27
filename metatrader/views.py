@@ -628,7 +628,7 @@ class robot_neopipsApiView(viewsets.ModelViewSet):
                 data = eval(list(request.data)[0].replace('\0', ''))
             except:
                 data = request.data
-           
+
             par_buscado = Pares.objects.using('postgres').get(pares=data['par'])
 
             resultado = list(variacion_pips_estimacion.objects.using('postgres').filter(par=par_buscado.pk).order_by('id').values())
@@ -707,12 +707,15 @@ class NotificationApiView(viewsets.ModelViewSet):
     queryset = Notification.objects.using('postgres').all()
     
     def create(self, request, *args, **kwargs):
-        serializer = NotificationSerializer(data=request.data)
-        if(serializer.is_valid()):
+        try:
+            data = eval(list(request.data)[0].replace('\0', ''))
+            title = data.get('title')
+            body = data.get('body')
+            user = data.get('user')
             access_token = self._get_access_token()
             authorization_header = f"Bearer {access_token}"
             url = "https://fcm.googleapis.com/v1/projects/app-trading-notifications/messages:send"
-            tokens_data_device = self._get_device_token(user=request.data.get("user"))
+            tokens_data_device = self._get_device_token(user=user)
             for token_info in tokens_data_device:
                 token_device = token_info.get("token")
                 headers = {
@@ -722,21 +725,22 @@ class NotificationApiView(viewsets.ModelViewSet):
                 data = {
                     "message": {
                         "notification": {
-                            "title": request.data.get("title"),
-                            "body": request.data.get("body")
+                            "title": title,
+                            "body": body
                         },
                         "token": "eLFVJsgFTO2EtjlS-nYNPM:APA91bF1_-OqzvxaLWs8j0-04hLPOsIXdZgKBPqxuIkh3m_Yiq9AKofTAfFz5xK0uBcmudnupOh0RrMIkkutEIcPssDLNrjO9EmAt11n_6v3oq4pEhbW-1Y4DuYUZro_f7RlVDhkNPzi"
                     }
                 }
                 response = requests.post(url, json=data, headers=headers)
                 if response.status_code == 200:
-                    Notification.objects.using('postgres').create(**serializer.validated_data)
+                    notification = Notification(title=title, body=body, user=user)
+                    notification.save()
                     print(f"Notificacion enviada correctamente!")
-                    Response(serializer.data, status=status.HTTP_201_CREATED)
+                    return Response(data, status=status.HTTP_201_CREATED)  
                 else:
                     print(f"Error al enviar la notificación a FCM para el token {token_device}. Detalles: {response.text}")
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else: 
+            return Response(data, status=status.HTTP_201_CREATED)  
+        except Exception as e: 
             return Response({'Error':'Dato no valido', 'RequestData': request.data}, status=status.HTTP_400_BAD_REQUEST)
     def _get_access_token(self):  
         credentials = service_account.Credentials.from_service_account_file(
