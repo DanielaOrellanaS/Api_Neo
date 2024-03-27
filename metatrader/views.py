@@ -728,7 +728,7 @@ class NotificationApiView(viewsets.ModelViewSet):
                             "title": title,
                             "body": body
                         },
-                        "token": "eLFVJsgFTO2EtjlS-nYNPM:APA91bF1_-OqzvxaLWs8j0-04hLPOsIXdZgKBPqxuIkh3m_Yiq9AKofTAfFz5xK0uBcmudnupOh0RrMIkkutEIcPssDLNrjO9EmAt11n_6v3oq4pEhbW-1Y4DuYUZro_f7RlVDhkNPzi"
+                        "token": token_device
                     }
                 }
                 response = requests.post(url, json=data, headers=headers)
