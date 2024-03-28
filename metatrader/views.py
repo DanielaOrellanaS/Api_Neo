@@ -17,6 +17,7 @@ import google.auth.transport.requests
 from google.oauth2 import service_account
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
+from rest_framework.exceptions import NotFound
 
 class ParesApiView(viewsets.ModelViewSet):
     serializer_class = ParesSerializer
@@ -700,20 +701,22 @@ class SentNotificationAllDevices(viewsets.ModelViewSet):
         request = google.auth.transport.requests.Request()
         credentials.refresh(request)
         return credentials.token
-
+    
 class NotificationApiView(viewsets.ModelViewSet):
     serializer_class = NotificationSerializer
     queryset = Notification.objects.using('postgres').all()
+
     def create(self, request, *args, **kwargs):
         serializer = NotificationSerializer(data=request.data)
-        if(serializer.is_valid()):
+        if serializer.is_valid():
             access_token = self._get_access_token()
             authorization_header = f"Bearer {access_token}"
             url = "https://fcm.googleapis.com/v1/projects/app-trading-notifications/messages:send"
             tokens_data_device = self._get_device_token(user=request.data.get("user"))
+            if not tokens_data_device: 
+                raise NotFound(detail="Usuario no encontrado", code=404)
             for token_info in tokens_data_device:
                 token_device = token_info.get("token")
-                print("Dipositivo: ", token_device)
                 headers = {
                     "Content-Type": "application/json",
                     "Authorization": authorization_header
@@ -730,13 +733,12 @@ class NotificationApiView(viewsets.ModelViewSet):
                 response = requests.post(url, json=data, headers=headers)
                 if response.status_code == 200:
                     Notification.objects.using('postgres').create(**serializer.validated_data)
-                    print(f"Notificacion enviada correctamente!")
-                    Response(serializer.data, status=status.HTTP_201_CREATED)
                 else:
-                    print(f"Error al enviar la notificación a FCM para el token {token_device}. Detalles: {response.text}")
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+                    error_message = {'Error al enviar la notificacion': response.text}
+                    return Response(error_message, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'Notificacion enviada correctamente!': serializer.data}, status=status.HTTP_201_CREATED)
         else: 
-            return Response({'Error':'Dato no valido'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'Error': 'Datos no válidos', 'Detalles': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     def _get_access_token(self):  
         credentials = service_account.Credentials.from_service_account_file(
             'service-account-file.json', scopes=['https://www.googleapis.com/auth/cloud-platform'])
@@ -745,10 +747,10 @@ class NotificationApiView(viewsets.ModelViewSet):
         return credentials.token
     def _get_device_token(self, user=None):
         tokens_endpoint = "https://tradinapi.azurewebsites.net/token/"
-        #TODOS
+        # TODOS
         if user is None or user.lower() == "all":
             return requests.get(tokens_endpoint).json()
-        #Personalizado
+        # Personalizado
         else:
             tokens_url = f"{tokens_endpoint}?user={user}"
             return requests.get(tokens_url).json()
