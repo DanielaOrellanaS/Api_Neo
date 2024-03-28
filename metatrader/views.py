@@ -586,15 +586,14 @@ class DeviceTokenApiView(viewsets.ModelViewSet):
             all_tokens = self.queryset
             serializer = self.get_serializer(all_tokens, many=True)
             return Response(serializer.data)
-
     def create(self, request, *args, **kwargs):
         serializer = DeviceTokenSerializer(data=request.data)
         if serializer.is_valid():
             DeviceToken.objects.using('postgres').create(**serializer.validated_data)
+            self.queryset = DeviceToken.objects.using('postgres').all()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response({'Error': 'Dato no válido'}, status=status.HTTP_400_BAD_REQUEST)
-
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data)
@@ -705,19 +704,16 @@ class SentNotificationAllDevices(viewsets.ModelViewSet):
 class NotificationApiView(viewsets.ModelViewSet):
     serializer_class = NotificationSerializer
     queryset = Notification.objects.using('postgres').all()
-    
     def create(self, request, *args, **kwargs):
-        try:
-            data = eval(list(request.data)[0].replace('\0', ''))
-            title = data.get('title')
-            body = data.get('body')
-            user = data.get('user')
+        serializer = NotificationSerializer(data=request.data)
+        if(serializer.is_valid()):
             access_token = self._get_access_token()
             authorization_header = f"Bearer {access_token}"
             url = "https://fcm.googleapis.com/v1/projects/app-trading-notifications/messages:send"
-            tokens_data_device = self._get_device_token(user=user)
+            tokens_data_device = self._get_device_token(user=request.data.get("user"))
             for token_info in tokens_data_device:
                 token_device = token_info.get("token")
+                print("Dipositivo: ", token_device)
                 headers = {
                     "Content-Type": "application/json",
                     "Authorization": authorization_header
@@ -725,23 +721,22 @@ class NotificationApiView(viewsets.ModelViewSet):
                 data = {
                     "message": {
                         "notification": {
-                            "title": title,
-                            "body": body
+                            "title": request.data.get("title"),
+                            "body": request.data.get("body")
                         },
-                        "token": "eU2I7IOeaC9jzZEJcTIgJq:APA91bGSv1jkTWTzPo643bqEQMF9-aqzW9_Ee1CwExkmpd4QazHCdXhlZ8WnJLCNiElw58GpS-V2mCqZvrDicq0q8szEf0LZzR5EoJSl9PMC6BWehsinmmp80gUw0MPqO1mTPHv3nwd9"
+                        "token": token_device
                     }
                 }
                 response = requests.post(url, json=data, headers=headers)
                 if response.status_code == 200:
-                    notification = Notification(title=title, body=body, user=user)
-                    notification.save()
+                    Notification.objects.using('postgres').create(**serializer.validated_data)
                     print(f"Notificacion enviada correctamente!")
-                    return Response(data, status=status.HTTP_201_CREATED)  
+                    Response(serializer.data, status=status.HTTP_201_CREATED)
                 else:
                     print(f"Error al enviar la notificación a FCM para el token {token_device}. Detalles: {response.text}")
-            return Response(data, status=status.HTTP_201_CREATED)  
-        except Exception as e: 
-            return Response({'Error':'Dato no valido', 'RequestData': request.data, 'TokenDevice: ':tokens_data_device}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else: 
+            return Response({'Error':'Dato no valido'}, status=status.HTTP_400_BAD_REQUEST)
     def _get_access_token(self):  
         credentials = service_account.Credentials.from_service_account_file(
             'service-account-file.json', scopes=['https://www.googleapis.com/auth/cloud-platform'])
@@ -757,4 +752,3 @@ class NotificationApiView(viewsets.ModelViewSet):
         else:
             tokens_url = f"{tokens_endpoint}?user={user}"
             return requests.get(tokens_url).json()
-
