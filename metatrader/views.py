@@ -707,7 +707,12 @@ class NotificationApiView(viewsets.ModelViewSet):
     queryset = Notification.objects.using('postgres').all()
 
     def create(self, request, *args, **kwargs):
-        serializer = NotificationSerializer(data=request.data)
+        #serializer = NotificationSerializer(data=request.data)
+        if b'\0' in request.body:
+            data = eval(list(request.data)[0].replace('\0', ''))
+            serializer = NotificationSerializer(data=data)
+        else:
+            serializer = NotificationSerializer(data=request.data)
         if serializer.is_valid():
             access_token = self._get_access_token()
             authorization_header = f"Bearer {access_token}"
