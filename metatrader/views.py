@@ -730,6 +730,7 @@ class NotificationApiView(viewsets.ModelViewSet):
                         "token": token_device
                     }
                 }
+                print('ENVIO SOLICITUD: ', request.data)
                 response = requests.post(url, json=data, headers=headers)
                 if response.status_code == 200:
                     Notification.objects.using('postgres').create(**serializer.validated_data)
@@ -738,7 +739,7 @@ class NotificationApiView(viewsets.ModelViewSet):
                     return Response(error_message, status=status.HTTP_400_BAD_REQUEST)
             return Response({'Notificacion enviada correctamente!': serializer.data}, status=status.HTTP_201_CREATED)
         else: 
-            return Response({'Error': 'Datos no válidos', 'Detalles': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'Error': 'Datos no válidos', 'Detalles': serializer.errors, 'Envio' : request.data}, status=status.HTTP_400_BAD_REQUEST)
     def _get_access_token(self):  
         credentials = service_account.Credentials.from_service_account_file(
             'service-account-file.json', scopes=['https://www.googleapis.com/auth/cloud-platform'])
