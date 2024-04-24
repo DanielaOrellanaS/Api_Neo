@@ -186,7 +186,6 @@ class variacion_pips_estimacion(models.Model):
 class Notification(models.Model):
     title = models.CharField(max_length=255)
     body = models.CharField(max_length=255)
-    user = models.CharField(max_length=255)
     
     class Meta: 
         db_table = 'Notification'

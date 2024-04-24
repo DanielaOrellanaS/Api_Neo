@@ -178,12 +178,26 @@ class ResumeDetailBalanceApiView(viewsets.ModelViewSet):
                             balance_percent = round(((latest_balance.balance - first_balance[0].balance) / first_balance[0].balance) * 100, 4)
                         else: 
                             balance_percent = 0 
+                        
+                        # Calcular el balance inicial del mes
+                        first_day_of_month = current_date.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+                        first_balance_month = DetailBalance.objects.using('postgres').filter(
+                            account_id=account_id, 
+                            date__range=[first_day_of_month.date(), current_date.date()]
+                        ).order_by('time').first()
+
+                        if first_balance_month:
+                            # Calcular el porcentaje mensual del balance
+                            month_balance_percent = round(((latest_balance.balance - first_balance_month.balance) / first_balance_month.balance) * 100, 4)
+                        else:
+                            month_balance_percent = 0
 
                         data = {
                             'balance': balance_formatted,
                             'flotante': flotante_formatted,
                             'percentage': float_percent,
                             'balance_percent': balance_percent,
+                            'month_balance_percent': month_balance_percent,  
                             'account_id': account_id,
                             'alias': alias,
                         }
@@ -194,6 +208,7 @@ class ResumeDetailBalanceApiView(viewsets.ModelViewSet):
                             'flotante': flotante_formatted,
                             'percentage': float_percent,
                             'balance_percent': 0,
+                            'month_balance_percent': 0,  # Nuevo campo agregado
                             'account_id': account_id,
                             'alias': alias,
                         }
@@ -203,7 +218,7 @@ class ResumeDetailBalanceApiView(viewsets.ModelViewSet):
             return Response(sorted_response_data, status=status.HTTP_200_OK)
         else:
             return Response({'Error': 'No se proporcionaron parámetros account_id'}, status=status.HTTP_400_BAD_REQUEST)
-        
+
 class AllDetailBalanceApiView(viewsets.ModelViewSet):
     serializer_class = OperationSerializer
 
@@ -471,7 +486,7 @@ class EventsApiView(viewsets.ModelViewSet):
                 queryset = queryset.filter(fecha=parsed_date)
         
         if not date_param:
-            return queryset.order_by('-fecha', '-hora')
+            return queryset.order_by('fecha', 'hora')
 
         return queryset.order_by('-fecha', '-hora')
     
@@ -575,32 +590,19 @@ class AlertEventsApiView(viewsets.ModelViewSet):
 class DeviceTokenApiView(viewsets.ModelViewSet):
     serializer_class = DeviceTokenSerializer
     queryset = DeviceToken.objects.using('postgres').all()
-
-    @method_decorator(never_cache)
-    def list(self, request, *args, **kwargs):
-        user = request.query_params.get('user', None)
-        if user:
-            user_token = DeviceToken.objects.using('postgres').filter(user=user)
-            serializer = self.get_serializer(user_token, many=True)
-            return Response(serializer.data)
-        else:
-            all_tokens = self.queryset
-            serializer = self.get_serializer(all_tokens, many=True)
-            return Response(serializer.data)
     def create(self, request, *args, **kwargs):
         serializer = DeviceTokenSerializer(data=request.data)
         if serializer.is_valid():
-            DeviceToken.objects.using('postgres').create(**serializer.validated_data)
-            self.queryset = DeviceToken.objects.using('postgres').all()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response({'Error': 'Dato no válido'}, status=status.HTTP_400_BAD_REQUEST)
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
+            user = serializer.validated_data.get('user')
+            token = serializer.validated_data.get('token')
+            existing_token = DeviceToken.objects.using('postgres').filter(user=user).first()
+            if existing_token:
+                existing_token.token = token
+                existing_token.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
