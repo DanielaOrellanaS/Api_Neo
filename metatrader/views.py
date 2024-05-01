@@ -184,7 +184,7 @@ class ResumeDetailBalanceApiView(viewsets.ModelViewSet):
                         first_balance_month = DetailBalance.objects.using('postgres').filter(
                             account_id=account_id, 
                             date__range=[first_day_of_month.date(), current_date.date()]
-                        ).order_by('time').first()
+                        ).order_by('date', 'time').first()
 
                         if first_balance_month:
                             # Calcular el porcentaje mensual del balance
