@@ -18,6 +18,9 @@ from google.oauth2 import service_account
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from rest_framework.exceptions import NotFound
+from django.db import connections
+from django.http import JsonResponse
+import logging
 
 class ParesApiView(viewsets.ModelViewSet):
     serializer_class = ParesSerializer
@@ -762,3 +765,29 @@ class NotificationApiView(viewsets.ModelViewSet):
         else:
             tokens_url = f"{tokens_endpoint}?user={user}"
             return requests.get(tokens_url).json()
+
+#CALL FUNCTION DISPATCHER 
+@api_view(['GET'])
+def dispatcher_view(request):
+    if request.method == 'GET':
+        entrada = request.query_params.get('entrada', '')
+
+        if not entrada:
+            return Response({'Error':'Entrada no proporcionada'}, status=status.HTTP_400_BAD_REQUEST)
+        resultado = _call_dispatcher(entrada)
+        return JsonResponse({'resultado': resultado})
+
+    else:
+        return Response({'Error':'Método no permitido'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+logger = logging.getLogger(__name__)
+def _call_dispatcher(entrada):
+    with connections['postgres'].cursor() as cursor: 
+        sql = "SELECT dispatcher(%s)"
+        logger.info(f"Ejecutando SQL: {sql} con entrada: {entrada}")
+
+        cursor.execute(sql, [entrada])
+        resultado = cursor.fetchone()[0]
+        logger.info(f"Resultado obtenido: {resultado}")
+
+    return resultado

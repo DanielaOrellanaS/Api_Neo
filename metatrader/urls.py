@@ -27,5 +27,6 @@ router.register(r'notification', views.NotificationApiView, basename='notificati
 
 urlpatterns = [
     path('', include(router.urls)), 
+    path('dispatcher/', views.dispatcher_view, name='dispatcher'),
     ]
     
