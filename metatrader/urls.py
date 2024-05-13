@@ -24,6 +24,7 @@ router.register(r'token', views.DeviceTokenApiView, basename='token')
 router.register(r'neobotpips', views.robot_neopipsApiView, basename='neobot')
 router.register(r'sentnotification', views.SentNotificationAllDevices, basename='sentnotification')
 router.register(r'notification', views.NotificationApiView, basename='notification')
+router.register(r'tendencia', views.TendenciaApiView, basename='tendencia')
 
 urlpatterns = [
     path('', include(router.urls)), 

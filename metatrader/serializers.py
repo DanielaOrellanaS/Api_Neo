@@ -98,3 +98,8 @@ class NotificationSerializer(serializers.ModelSerializer):
     class Meta: 
         model = Notification
         fields = '__all__'
+
+class TendenciaSerializer(serializers.ModelSerializer):
+    class Meta: 
+        model = Tendencia
+        fields = '__all__'

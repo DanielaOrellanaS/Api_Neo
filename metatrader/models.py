@@ -189,3 +189,15 @@ class Notification(models.Model):
     
     class Meta: 
         db_table = 'Notification'
+        
+class Tendencia(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    fechai = models.DateTimeField(db_column='fechai', blank=True, null=True)
+    fechaf = models.DateTimeField(db_column='fechaf', blank=True, null=True)
+    currency = models.CharField(max_length=255)
+    trendy = models.CharField(max_length=255)
+    sl = models.FloatField(db_column='sl',blank=True, null=True)
+    tp = models.FloatField(db_column='tp',blank=True, null=True)
+    
+    class Meta: 
+        db_table = 'tendencia'

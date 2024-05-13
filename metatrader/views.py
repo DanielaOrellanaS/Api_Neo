@@ -791,3 +791,14 @@ def _call_dispatcher(entrada):
         logger.info(f"Resultado obtenido: {resultado}")
 
     return resultado
+
+class TendenciaApiView(viewsets.ModelViewSet):
+    serializer_class = TendenciaSerializer
+    queryset = Tendencia.objects.using('postgres').all()
+    def create(self, request, *args, **kwargs):
+        serializer = TendenciaSerializer(data=request.data)
+        if(serializer.is_valid()):
+            Tendencia.objects.using('postgres').create(**serializer.validated_data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response({'Error':'Dato no valido'}, status=status.HTTP_400_BAD_REQUEST)
