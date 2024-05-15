@@ -228,8 +228,16 @@ class AllDetailBalanceApiView(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         account_id = request.query_params.get('account_id')
         if account_id is not None:
-            open_operations = Operation.objects.using('postgres').filter(account_id=account_id, dateClose='1970-01-01T00:00:00Z').order_by('-dateOpen')[:10]
-            closed_operations = Operation.objects.using('postgres').filter(account_id=account_id).exclude(dateClose='1970-01-01T00:00:00Z').order_by('-dateClose')[:10]
+            
+            today = timezone.now().date()
+            open_operations = Operation.objects.using('postgres').filter(
+                account_id=account_id, dateClose='1970-01-01T00:00:00Z', dateOpen__date=today
+            ).order_by('-dateOpen')[:10]
+            closed_operations = Operation.objects.using('postgres').filter(
+                account_id=account_id
+            ).exclude(dateClose='1970-01-01T00:00:00Z').filter(
+                dateClose__date=today
+            ).order_by('-dateClose')[:10]
 
             open_serializer = OperationSerializer(open_operations, many=True)
             closed_serializer = OperationSerializer(closed_operations, many=True)
