@@ -21,6 +21,7 @@ from rest_framework.exceptions import NotFound
 from django.db import connections
 from django.http import JsonResponse
 import logging
+from rest_framework.parsers import MultiPartParser, FormParser
 
 class ParesApiView(viewsets.ModelViewSet):
     serializer_class = ParesSerializer
@@ -810,3 +811,16 @@ class TendenciaApiView(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response({'Error':'Dato no valido'}, status=status.HTTP_400_BAD_REQUEST)
+
+class ResultFilesApiView(viewsets.ModelViewSet):
+    serializer_class = ResultFilesSerializer
+    queryset = ResultFiles.objects.using('postgres').all()
+    parser_classes = (MultiPartParser, FormParser)
+
+    def create(self, request, *args, **kwargs):
+        serializer = ResultFilesSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

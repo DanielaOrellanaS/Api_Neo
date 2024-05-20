@@ -103,3 +103,8 @@ class TendenciaSerializer(serializers.ModelSerializer):
     class Meta: 
         model = Tendencia
         fields = '__all__'
+
+class ResultFilesSerializer(serializers.ModelSerializer):
+    class Meta: 
+        model = ResultFiles
+        fields = '__all__'

@@ -201,3 +201,12 @@ class Tendencia(models.Model):
     
     class Meta: 
         db_table = 'tendencia'
+
+class ResultFiles(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    nameFile = models.CharField(max_length=255)
+    fileUpload = models.BinaryField()
+    dateUpload = models.DateTimeField(db_column='dateUpload', blank=True, null=True)
+    
+    class Meta: 
+        db_table = 'ResultFiles'
