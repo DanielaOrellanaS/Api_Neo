@@ -229,16 +229,23 @@ class AllDetailBalanceApiView(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         account_id = request.query_params.get('account_id')
         if account_id is not None:
-            
-            today = timezone.now().date()
+            now = timezone.now()
+            start_date = (now - timedelta(hours=8)).date()
+            end_date = (now + timedelta(hours=8)).date()
+
+            # Operaciones abiertas
             open_operations = Operation.objects.using('postgres').filter(
-                account_id=account_id, dateClose='1970-01-01T00:00:00Z', dateOpen__date=today
-            ).order_by('-dateOpen')[:10]
+                account_id=account_id,
+                dateClose='1970-01-01T00:00:00Z',
+                dateOpen__date__range=[start_date, end_date]
+            ).order_by('-dateOpen')
+
+            # Operaciones cerradas
             closed_operations = Operation.objects.using('postgres').filter(
                 account_id=account_id
             ).exclude(dateClose='1970-01-01T00:00:00Z').filter(
-                dateClose__date=today
-            ).order_by('-dateClose')[:10]
+                dateClose__date__range=[start_date, end_date]
+            ).order_by('-dateClose')
 
             open_serializer = OperationSerializer(open_operations, many=True)
             closed_serializer = OperationSerializer(closed_operations, many=True)
@@ -251,12 +258,12 @@ class AllDetailBalanceApiView(viewsets.ModelViewSet):
                 'flotante': format(latest_detail_balance.flotante if latest_detail_balance else None, ',.4f'),
                 'equity': format(latest_detail_balance.equity if latest_detail_balance else None, ',.4f'),
                 'gain': format(day_gain, ',.2f'),
-                'num_operations': latest_detail_balance.operations if latest_detail_balance else None,
-                'colas': self.get_operations_by_symbol(account_id), 
+                'num_operations': open_operations.count() + closed_operations.count(),
+                'colas': self.get_operations_by_symbol(account_id),
                 'open_operations': open_serializer.data,
                 'closed_operations': closed_serializer.data,
             }
-            
+
             balance_value = latest_detail_balance.balance if latest_detail_balance else 0
             flotante_value = latest_detail_balance.flotante if latest_detail_balance else 0
             if flotante_value != 0:
@@ -264,14 +271,14 @@ class AllDetailBalanceApiView(viewsets.ModelViewSet):
                 response_data['percentage'] = round(percentage, 2)
             else:
                 response_data['percentage'] = None
-            
+
             self.format_operations(response_data['open_operations'])
             self.format_operations(response_data['closed_operations'])
-            
+
             return Response(response_data, status=status.HTTP_200_OK)
         else:
             return Response({'Error': 'No se proporcionó el parámetro account_id'}, status=status.HTTP_400_BAD_REQUEST)
-    
+
     def format_operations(self, operations):
         for operation in operations:
             operation['dateOpen'] = timezone.datetime.strptime(operation['dateOpen'], "%Y-%m-%dT%H:%M:%SZ").strftime('%Y-%m-%d %H:%M:%S')
@@ -281,22 +288,19 @@ class AllDetailBalanceApiView(viewsets.ModelViewSet):
                 operation[key] = format(operation[key], ',.4f') if isinstance(operation[key], float) else operation[key]
 
     def get_day_gain(self, account_id):
-        #DESC
         detail_balances = DetailBalance.objects.using('postgres').filter(account_id=account_id).order_by('-date', '-time')
-        #Balance actual
-        latest_balance = detail_balances
-        #Balance inicial 
-        first_balance = DetailBalance.objects.using('postgres').filter(
-            account_id=account_id, date=latest_balance[0].date).order_by('time')
-        
-        current_date = datetime.now()+timedelta(hours=2)  
-        if latest_balance.exists() and first_balance.exists():
-            if latest_balance[0].date == current_date.date(): 
-                gain = latest_balance[0].balance - first_balance[0].balance
-            else: 
-                gain = 0
-        return gain 
-        
+        latest_balance = detail_balances.first()
+        current_date = timezone.now().date()
+
+        if latest_balance:
+            first_balance = DetailBalance.objects.using('postgres').filter(
+                account_id=account_id, date=latest_balance.date
+            ).order_by('time').first()
+            if first_balance:
+                gain = latest_balance.balance - first_balance.balance
+                return gain
+        return 0
+
     def get_operations_by_symbol(self, account_id=None):
         if account_id is None:
             account_ids = Account.objects.using('postgres').values_list('id', flat=True)
@@ -318,7 +322,6 @@ class AllDetailBalanceApiView(viewsets.ModelViewSet):
                 .annotate(open_operations=Count('id'))
             )
             return list(operations_for_account)
-        
         
 #-----------------------------------------------------------------------------------------
 
@@ -820,7 +823,7 @@ class ResultFilesApiView(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = ResultFilesSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            ResultFiles.objects.using('postgres').create(**serializer.validated_data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
