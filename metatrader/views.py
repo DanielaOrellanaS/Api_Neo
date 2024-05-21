@@ -22,6 +22,10 @@ from django.db import connections
 from django.http import JsonResponse
 import logging
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.decorators import action
+from django.http import HttpResponse
+from django.utils.encoding import smart_str
+from datetime import datetime
 
 class ParesApiView(viewsets.ModelViewSet):
     serializer_class = ParesSerializer
@@ -814,16 +818,29 @@ class TendenciaApiView(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response({'Error':'Dato no valido'}, status=status.HTTP_400_BAD_REQUEST)
-
+        
 class ResultFilesApiView(viewsets.ModelViewSet):
     serializer_class = ResultFilesSerializer
     queryset = ResultFiles.objects.using('postgres').all()
     parser_classes = (MultiPartParser, FormParser)
 
     def create(self, request, *args, **kwargs):
-        serializer = ResultFilesSerializer(data=request.data)
+        name_file = request.data.get('file').name
+        date_upload = datetime.now()
+
+        serializer = ResultFilesSerializer(data={'nameFile': name_file, 'dateUpload': date_upload, 'fileUpload': request.data.get('file')})
         if serializer.is_valid():
             ResultFiles.objects.using('postgres').create(**serializer.validated_data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['get'])
+    def download(self, request, pk=None):
+        file_obj = self.get_object()
+        file_content = file_obj.fileUpload
+        filename = file_obj.nameFile
+
+        response = HttpResponse(file_content, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="{}"'.format(smart_str(filename))
+        return response
