@@ -1,6 +1,8 @@
 from django.urls import path, include
 from metatrader import views
 from rest_framework import routers
+from django.conf import settings
+from django.conf.urls.static import static
 
 # routes endpoints
 router = routers.DefaultRouter()
@@ -30,5 +32,8 @@ router.register(r'result_files', views.ResultFilesApiView, basename='result_file
 urlpatterns = [
     path('', include(router.urls)), 
     path('dispatcher/', views.dispatcher_view, name='dispatcher'),
+    path('result_files/download/<str:filename>/', views.ResultFilesApiView.as_view({'get': 'download_file'}), name='download_file'),
     ]
-    
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

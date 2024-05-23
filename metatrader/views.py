@@ -26,6 +26,8 @@ from rest_framework.decorators import action
 from django.http import HttpResponse
 from django.utils.encoding import smart_str
 from datetime import datetime
+import os
+from django.conf import settings
 
 class ParesApiView(viewsets.ModelViewSet):
     serializer_class = ParesSerializer
@@ -818,29 +820,53 @@ class TendenciaApiView(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response({'Error':'Dato no valido'}, status=status.HTTP_400_BAD_REQUEST)
-        
+
 class ResultFilesApiView(viewsets.ModelViewSet):
     serializer_class = ResultFilesSerializer
     queryset = ResultFiles.objects.using('postgres').all()
     parser_classes = (MultiPartParser, FormParser)
 
     def create(self, request, *args, **kwargs):
-        name_file = request.data.get('file').name
+        file = request.data.get('file')
+        if not file:
+            return Response({"error": "No file provided"}, status=status.HTTP_400_BAD_REQUEST)
+
+        name_file = file.name
         date_upload = datetime.now()
 
-        serializer = ResultFilesSerializer(data={'nameFile': name_file, 'dateUpload': date_upload, 'fileUpload': request.data.get('file')})
+        serializer = ResultFilesSerializer(data={'nameFile': name_file, 'dateUpload': date_upload, 'fileUpload': file})
         if serializer.is_valid():
             ResultFiles.objects.using('postgres').create(**serializer.validated_data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=True, methods=['get'])
-    def download(self, request, pk=None):
-        file_obj = self.get_object()
-        file_content = file_obj.fileUpload
-        filename = file_obj.nameFile
+    @action(detail=False, methods=['get'])
+    def list_files(self, request):
+        try:
+            upload_dir = os.path.join(settings.MEDIA_ROOT, 'uploads')
+            if not os.path.exists(upload_dir):
+                return Response({"error": "Upload directory not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        response = HttpResponse(file_content, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="{}"'.format(smart_str(filename))
-        return response
+            files = os.listdir(upload_dir)
+            file_list = [{"nameFile": file, "path": os.path.join(settings.MEDIA_URL, 'uploads', file)} for file in files]
+            return JsonResponse(file_list, safe=False)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+    @action(detail=False, methods=['get'], url_path='download/(?P<filename>[^/]+)')
+    def download_file(self, request, filename):
+        print('MEDIA ROOT: ', settings.MEDIA_ROOT)
+        print('FILE NAME: ', filename)
+        try:
+            file_path = os.path.join(settings.MEDIA_ROOT, 'uploads', filename)
+            if not os.path.exists(file_path):
+                return Response({"error": "File not found"}, status=status.HTTP_404_NOT_FOUND)
+
+            with open(file_path, 'rb') as file:
+                response = HttpResponse(file.read(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+                response['Content-Disposition'] = f'attachment; filename="{smart_str(filename)}"'
+                return response
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
