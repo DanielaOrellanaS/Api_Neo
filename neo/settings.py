@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
-from dotenv import load_dotenv
 
 import mimetypes
 mimetypes.add_type('text/css','.css',True)
@@ -42,10 +41,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Archivos estáticos (CSS, JavaScript, imágenes)
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-
-load_dotenv()
-GOOGLE_APPLICATION_CREDENTIALS = os.path.join(BASE_DIR, os.getenv('GOOGLE_APPLICATION_CREDENTIALS'))
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
