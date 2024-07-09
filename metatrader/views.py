@@ -30,6 +30,7 @@ import os
 from django.conf import settings
 from django.http import HttpResponse, JsonResponse, FileResponse
 from django.core.files.storage import default_storage
+from googleapiclient.discovery import build
 
 class ParesApiView(viewsets.ModelViewSet):
     serializer_class = ParesSerializer
@@ -822,6 +823,15 @@ class TendenciaApiView(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response({'Error':'Dato no valido'}, status=status.HTTP_400_BAD_REQUEST)
+
+SCOPES = ['https://www.googleapis.com/auth/drive.file']
+SERVICE_ACCOUNT_FILE = 'uploadfiles-428313-b8dbdfd87be0.json'
+file_path = os.path.join(os.getcwd(), SERVICE_ACCOUNT_FILE)
+credentials = service_account.Credentials.from_service_account_file(
+    file_path, scopes=SCOPES)
+
+service = build('drive', 'v3', credentials=credentials)
+
 
 class ResultFilesApiView(viewsets.ModelViewSet):
     serializer_class = ResultFilesSerializer
