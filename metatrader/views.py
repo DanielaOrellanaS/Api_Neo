@@ -30,7 +30,6 @@ import os
 from django.conf import settings
 from django.http import HttpResponse, JsonResponse, FileResponse
 from django.core.files.storage import default_storage
-from googleapiclient.discovery import build
 
 class ParesApiView(viewsets.ModelViewSet):
     serializer_class = ParesSerializer
