@@ -30,7 +30,9 @@ import os
 from django.conf import settings
 from django.http import HttpResponse, JsonResponse, FileResponse
 from django.core.files.storage import default_storage
-
+import io
+from googleapiclient.http import MediaIoBaseUpload
+from googleapiclient.discovery import build
 
 class ParesApiView(viewsets.ModelViewSet):
     serializer_class = ParesSerializer
@@ -824,6 +826,32 @@ class TendenciaApiView(viewsets.ModelViewSet):
         else:
             return Response({'Error':'Dato no valido'}, status=status.HTTP_400_BAD_REQUEST)
 
+def load_dotenv(dotenv_path):
+    """Carga las variables de entorno desde un archivo .env."""
+    with open(dotenv_path) as f:
+        for line in f:
+            if line.startswith('#') or '=' not in line:
+                continue
+            key, value = line.strip().split('=', 1)
+            os.environ[key] = value
+
+# Define la ruta al archivo .env
+env_path = '.env'
+
+# Carga las variables de entorno desde el archivo .env
+load_dotenv(env_path)
+
+# Usa la variable de entorno
+GOOGLE_APPLICATION_CREDENTIALS = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
+
+SCOPES = ['https://www.googleapis.com/auth/drive.file']
+SERVICE_ACCOUNT_FILE = GOOGLE_APPLICATION_CREDENTIALS
+
+credentials = service_account.Credentials.from_service_account_file(
+    SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+
+service = build('drive', 'v3', credentials=credentials)
+
 class ResultFilesApiView(viewsets.ModelViewSet):
     serializer_class = ResultFilesSerializer
     queryset = ResultFiles.objects.using('postgres').all()
@@ -834,45 +862,63 @@ class ResultFilesApiView(viewsets.ModelViewSet):
         if not file:
             return Response({"error": "No file provided"}, status=status.HTTP_400_BAD_REQUEST)
 
-        name_file = file.name
-        date_upload = datetime.now()
+        # Subir el archivo a Google Drive
+        file_metadata = {'name': file.name}
+        media = MediaIoBaseUpload(io.BytesIO(file.read()), mimetype=file.content_type)
 
-        serializer = ResultFilesSerializer(data={'nameFile': name_file, 'dateUpload': date_upload, 'fileUpload': file})
-        if serializer.is_valid():
-            ResultFiles.objects.using('postgres').create(**serializer.validated_data)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            uploaded_file = service.files().create(
+                body=file_metadata, media_body=media, fields='id, webViewLink').execute()
+            
+            file_id = uploaded_file.get('id')
+            permission = {
+                'type': 'anyone',
+                'role': 'writer' 
+            }
+            service.permissions().create(
+                fileId=file_id,
+                body=permission
+            ).execute()
+            
+            file_url = uploaded_file.get('webViewLink')
+            date_upload = datetime.now()
+            
+            # Guarda el URL de Google Drive sin modificar en la base de datos
+            serializer = ResultFilesSerializer(data={'nameFile': file.name, 'dateUpload': date_upload, 'fileUpload': file_url})
+            if serializer.is_valid():
+                ResultFiles.objects.using('postgres').create(**serializer.validated_data)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'Error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=False, methods=['get'])
     def list_files(self, request):
         try:
-            upload_dir = os.path.join(settings.MEDIA_ROOT, 'uploads')
-            if not os.path.exists(upload_dir):
-                return Response({"error": "Upload directory not found"}, status=status.HTTP_404_NOT_FOUND)
-
-            files = os.listdir(upload_dir)
-            file_list = [{"nameFile": file, "path": os.path.join(settings.MEDIA_URL, 'uploads', file)} for file in files]
+            files = ResultFiles.objects.using('postgres').all()
+            # Lista directamente la URL de Google Drive guardada en la base de datos
+            file_list = [{"nameFile": file.nameFile, "url": file.fileUpload} for file in files]
             return JsonResponse(file_list, safe=False)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-    @action(detail=False, methods=['get'], url_path='download/(?P<filename>[^/]+)')
-    def download_file(self, request, filename):
-        print('MEDIA ROOT: ', settings.MEDIA_ROOT)
-        print('FILE NAME: ', filename)
+    @action(detail=False, methods=['get'])
+    def download_file(self, request):
+        filename = request.query_params.get('filename')
+        print("NOMBRE ARCHIVO: ", filename)
+        if not filename:
+            return Response({"error": "Filename parameter is missing"}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            file_path = os.path.join(settings.MEDIA_ROOT, 'uploads', filename)
-            if not os.path.exists(file_path):
-                return Response({"error": "File not found"}, status=status.HTTP_404_NOT_FOUND)
-
-            with open(file_path, 'rb') as file:
-                response = HttpResponse(file.read(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-                response['Content-Disposition'] = f'attachment; filename="{smart_str(filename)}"'
-                return response
+            file = ResultFiles.objects.using('postgres').get(nameFile=filename)
+            file_url = file.fileUpload
+            print("ENLACE DE DESCARGA: ", file_url)
+            return JsonResponse({"url": file_url})
+        except ResultFiles.DoesNotExist:
+            return Response({"error": "File not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 @api_view(['POST'])
 def upload_file(request):
