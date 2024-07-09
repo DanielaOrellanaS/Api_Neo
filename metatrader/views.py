@@ -30,7 +30,6 @@ import os
 from django.conf import settings
 from django.http import HttpResponse, JsonResponse, FileResponse
 from django.core.files.storage import default_storage
-from dotenv import load_dotenv
 
 class ParesApiView(viewsets.ModelViewSet):
     serializer_class = ParesSerializer
