@@ -30,7 +30,7 @@ import os
 from django.conf import settings
 from django.http import HttpResponse, JsonResponse, FileResponse
 from django.core.files.storage import default_storage
-
+from dotenv import load_dotenv
 
 class ParesApiView(viewsets.ModelViewSet):
     serializer_class = ParesSerializer
@@ -860,8 +860,6 @@ class ResultFilesApiView(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], url_path='download/(?P<filename>[^/]+)')
     def download_file(self, request, filename):
-        print('MEDIA ROOT: ', settings.MEDIA_ROOT)
-        print('FILE NAME: ', filename)
         try:
             file_path = os.path.join(settings.MEDIA_ROOT, 'uploads', filename)
             if not os.path.exists(file_path):
