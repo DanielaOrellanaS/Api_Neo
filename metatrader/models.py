@@ -205,7 +205,7 @@ class Tendencia(models.Model):
 class ResultFiles(models.Model):
     id = models.BigAutoField(primary_key=True)
     nameFile = models.CharField(max_length=255)
-    fileUpload = models.FileField(upload_to='uploads/')
+    fileUpload = models.CharField(max_length=255)
     dateUpload = models.DateTimeField(db_column='dateUpload', blank=True, null=True)
     
     class Meta: 
