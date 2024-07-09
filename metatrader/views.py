@@ -827,12 +827,17 @@ class TendenciaApiView(viewsets.ModelViewSet):
 SCOPES = ['https://www.googleapis.com/auth/drive.file']
 SERVICE_ACCOUNT_FILE = 'uploadfiles-428313-b8dbdfd87be0.json'
 file_path = os.path.join(os.getcwd(), SERVICE_ACCOUNT_FILE)
-credentials = service_account.Credentials.from_service_account_file(
-    file_path, scopes=SCOPES)
 
-service = build('drive', 'v3', credentials=credentials)
+try:
+    credentials = service_account.Credentials.from_service_account_file(
+        file_path, scopes=SCOPES)
 
-
+    service = build('drive', 'v3', credentials=credentials)
+    print("Credenciales cargadas exitosamente.")
+except Exception as e:
+    print("Error al cargar las credenciales del servicio de Google:")
+    print(e)
+    
 class ResultFilesApiView(viewsets.ModelViewSet):
     serializer_class = ResultFilesSerializer
     queryset = ResultFiles.objects.using('postgres').all()
