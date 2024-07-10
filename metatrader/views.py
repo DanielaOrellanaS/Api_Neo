@@ -870,39 +870,3 @@ class ResultFilesApiView(viewsets.ModelViewSet):
                 return response
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-@api_view(['POST'])
-def upload_file(request):
-    if 'file' not in request.FILES:
-        return Response({'Error': 'Archivo no proporcionado'}, status=status.HTTP_400_BAD_REQUEST)
-
-    file = request.FILES['file']
-    file_name = default_storage.save(f'uploads/{file.name}', file)
-    file_url = os.path.join(settings.MEDIA_URL, file_name)
-    
-    return JsonResponse({'file_url': file_url})
-
-@api_view(['GET'])
-def list_files(request):
-    uploads_dir = os.path.join(settings.MEDIA_ROOT, 'uploads')
-    if not os.path.exists(uploads_dir):
-        return JsonResponse({'files': []})
-
-    files = os.listdir(uploads_dir)
-    files = [f'uploads/{file}' for file in files]
-
-    return JsonResponse({'files': files})
-
-@api_view(['GET'])
-def download_file(request):
-    file_path = request.query_params.get('file_path', '')
-
-    if not file_path:
-        return Response({'Error': 'Ruta del archivo no proporcionada'}, status=status.HTTP_400_BAD_REQUEST)
-    
-    file_abs_path = os.path.join(settings.MEDIA_ROOT, file_path)
-    
-    if not os.path.exists(file_abs_path):
-        return Response({'Error': 'Archivo no encontrado'}, status=status.HTTP_404_NOT_FOUND)
-    
-    return FileResponse(open(file_abs_path, 'rb'))
